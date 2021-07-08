@@ -9,7 +9,7 @@ class GrowthPolicy(Enum):
     ALL_TERMS = 1
     SELECT_BY_DERIVATIVE = 2
 
-class SimpleInterpretableClassifier:
+class DeepInterpretablePolynomialNeuralNetwork:
     def __init__(self, d_max, lambda_param, balance, fixed_margin=True, ro=1.0, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
                  max_no_terms_per_iteration=-1, max_no_terms=-1, growth_policy=GrowthPolicy.ALL_TERMS):
         # The margin
@@ -163,12 +163,12 @@ class SimpleInterpretableClassifier:
     def train_phase1(self):
         if not self.fixed_margin:
             bnds = tuple([(0.0, None)]*self.no_features)
-            res = minimize(SimpleInterpretableClassifier.objective_function, 
+            res = minimize(DeepInterpretablePolynomialNeuralNetwork.objective_function, 
                            args=(self.X_train_cr, self.Y_train, self.m, self.n, self.cr_degrees_limits, self.cr_degree, self.lambda_param, self.fixed_margin, self.ro, self.balance), x0=self.beta_optimal, bounds=bnds)
         else:      
             bnds = tuple([(0.0, 1.0/float(self.ro))]*self.no_features)
             cons = ({'type': 'eq', 'fun': lambda beta: 1.0/float(self.ro) - np.sum(beta)})
-            res = minimize(SimpleInterpretableClassifier.objective_function, 
+            res = minimize(DeepInterpretablePolynomialNeuralNetwork.objective_function, 
                            args=(self.X_train_cr, self.Y_train, self.m, self.n, self.cr_degrees_limits, self.cr_degree, self.lambda_param, self.fixed_margin, self.ro, self.balance), x0=self.beta_optimal, bounds=bnds, constraints=cons)
         beta_optimal = res.x
         return beta_optimal
