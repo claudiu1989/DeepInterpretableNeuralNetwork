@@ -1,1 +1,1 @@
-# DeepInterpretableNeuralNetwork
+# Deep Interpretable Neural Network
