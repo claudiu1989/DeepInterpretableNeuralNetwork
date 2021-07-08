@@ -1,8 +1,7 @@
 import xlrd
 import csv
 import numpy as np
-from simple_interpretable_classifier import GrowthPolicy
-from simple_interpretable_classifier import SimpleInterpretableClassifier
+from DeepInterpretablePolynomialNeuralNetwork.src.deep_interpretable_polynomial_neural_network import DeepInterpretablePolynomialNeuralNetwork, GrowthPolicy
 
 classes_encoding = {}
 classes_encoding['c-CS-m'] = 0
@@ -61,7 +60,7 @@ def basic_experiment_no_growth(X,Y):
     lambda_param = 10.0
     ro = 1.0
     fixed_margin = True
-    sip = SimpleInterpretableClassifier(d_max, lambda_param, balance, fixed_margin, ro)
+    sip = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
     no_runs = 1
     sip.evaluate_multiple_times(X, Y, no_runs)
     print('Optimal w:')

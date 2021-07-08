@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../')
-import  Classifier.simple_interpretable_classifier
+#sys.path.append('../')
+import  DeepInterpretablePolynomialNeuralNetwork.src.deep_interpretable_polynomial_neural_network
 
 

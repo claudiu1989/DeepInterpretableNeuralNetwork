@@ -1,7 +1,8 @@
 import csv
+import sys
 import numpy as np
-
-from simple_interpretable_classifier import SimpleInterpretableClassifier, GrowthPolicy
+sys.path.append('../')
+from DeepInterpretablePolynomialNeuralNetwork.src.deep_interpretable_polynomial_neural_network import DeepInterpretablePolynomialNeuralNetwork, GrowthPolicy
 
 def read_data(path):
     X = []
@@ -94,7 +95,7 @@ def basic_test_all_terms():
     lambda_param = 10.0
     ro = 1.0
     fixed_margin = True
-    sip = SimpleInterpretableClassifier(d_max, lambda_param, balance, fixed_margin, ro, derivative_magnitude_th=0.0, growth_policy=GrowthPolicy.ALL_TERMS)
+    sip = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro, derivative_magnitude_th=0.0, growth_policy=GrowthPolicy.ALL_TERMS)
     no_runs = 1
     sip.evaluate_multiple_times(X, Y, no_runs)
     w_optim_trimed = [w if w>0.01 else 0.0 for w in sip.w_optimal]
@@ -111,13 +112,13 @@ def basic_test_all_terms():
     print(f'Ro:{sip.ro}')
 
 def basic_test_growth():
-    X, Y, features_names = read_data('./Data/adult.data')
+    X, Y, features_names = read_data('../data/adult.data')
     d_max = 1
     balance = 1.0
     lambda_param = 1.0
     ro = 1.0
     fixed_margin = True
-    sip = SimpleInterpretableClassifier(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.02, coeff_magnitude_th=0.02, 
+    sip = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.02, coeff_magnitude_th=0.02, 
                                         max_no_terms_per_iteration=20, max_no_terms=300, growth_policy=GrowthPolicy.SELECT_BY_DERIVATIVE)
     no_runs = 1
     sip.evaluate_multiple_times(X, Y, no_runs)

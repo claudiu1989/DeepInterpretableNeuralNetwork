@@ -1,8 +1,6 @@
 import csv
 import numpy as np
-from simple_interpretable_classifier import GrowthPolicy
-
-from simple_interpretable_classifier import SimpleInterpretableClassifier
+from DeepInterpretablePolynomialNeuralNetwork.src.deep_interpretable_polynomial_neural_network import DeepInterpretablePolynomialNeuralNetwork, GrowthPolicy
 
 def read_data(path):
     with open(path) as csvfile:
@@ -40,7 +38,7 @@ def basic_experiment_no_growth():
     lambda_param = 1.0
     ro = 1.0
     fixed_margin = False
-    sip = SimpleInterpretableClassifier(d_max, lambda_param, balance, fixed_margin, ro)
+    sip = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
     X, Y = read_data('.\data\heart_failure_clinical_records_dataset.csv')
     X = convert_to_logical_values(X)
     no_runs = 100
@@ -56,7 +54,7 @@ def basic_experiment_with_growth():
     lambda_param = 1.0
     ro = 1.0
     fixed_margin = False
-    sip = SimpleInterpretableClassifier(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
+    sip = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
                                         max_no_terms_per_iteration=10, max_no_terms=200, growth_policy=GrowthPolicy.SELECT_BY_DERIVATIVE)
     X, Y = read_data('.\data\heart_failure_clinical_records_dataset.csv')
     X = convert_to_logical_values(X)
