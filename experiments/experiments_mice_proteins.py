@@ -1,6 +1,8 @@
 import xlrd
 import csv
+import sys
 import numpy as np
+sys.path.append('../')
 from DeepInterpretablePolynomialNeuralNetwork.src.deep_interpretable_polynomial_neural_network import DeepInterpretablePolynomialNeuralNetwork, GrowthPolicy
 
 classes_encoding = {}

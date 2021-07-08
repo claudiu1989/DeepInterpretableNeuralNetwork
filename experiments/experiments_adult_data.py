@@ -112,7 +112,7 @@ def basic_test_all_terms():
     print(f'Ro:{sip.ro}')
 
 def basic_test_growth():
-    X, Y, features_names = read_data('../data/adult.data')
+    X, Y, features_names = read_data('./data/adult.data')
     d_max = 1
     balance = 1.0
     lambda_param = 1.0

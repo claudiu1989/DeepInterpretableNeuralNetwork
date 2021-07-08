@@ -1,5 +1,7 @@
 import csv
 import numpy as np
+import sys
+sys.path.append('../')
 from DeepInterpretablePolynomialNeuralNetwork.src.deep_interpretable_polynomial_neural_network import DeepInterpretablePolynomialNeuralNetwork, GrowthPolicy
 
 def read_data(path):
