@@ -316,7 +316,6 @@ class DeepInterpretablePolynomialNeuralNetwork:
         else:
             return True
        
-
     def compute_derivative(self, term, next_degree, data_exp_factors):
         new_features = [np.prod(x[term]) for x in self.X_train]
         y_ix_dij = self.Y_train * new_features
