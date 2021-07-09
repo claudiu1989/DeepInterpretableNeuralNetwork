@@ -58,3 +58,79 @@ class TestDipnn(unittest.TestCase):
         X_with_negates = dipnn.add_negated_variables(X)
         are_identical = np.array_equal(np.array(X_with_negates), np.array(expected_result))
         self.assertTrue(are_identical)
+
+    @parameterized.expand([
+        [np.array([[1.0,1.0,1.0,1.0],[1.0,1.0,0.0,0.0]]), np.array([1.0,-1.0]), np.array([1.0,0.0,0.0,0.0]),np.array([2.718,2.718])],
+        [np.array([[1.0,1.0,1.0,1.0],[1.0,1.0,0.0,0.0]]), np.array([1.0,-1.0]), np.array([0.0,0.0,0.0,0.0]),np.array([54.598,0.367])]])   
+    def test_compute_exp_factors_derivative(self, X_train_cr, Y_train, beta_optimal, expected_result):
+        d_max = 1
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.beta_optimal = beta_optimal
+        dipnn.X_train_cr = X_train_cr
+        dipnn.Y_train = Y_train
+        exp_factors = dipnn.compute_exp_factors_derivative()
+        for expected, computed in zip(exp_factors, expected_result):
+           assert_almost_equal(expected, computed,decimal=3)
+
+    @parameterized.expand([
+    [np.array([[1.0,1.0,1.0,1.0],[1.0,0.0,0.0,0.0]]), np.array([1.0,-1.0]), np.array([1.0,0.0]),[1,0], 2, 0.384],
+    [np.array([[1.0,1.0,1.0,1.0],[1.0,0.0,1.0,0.0]]), np.array([-1.0,-1.0]), np.array([1.0,0.0]),[1,0], 2, 2.384]])   
+    def test_compute_derivative(self, X_train, Y_train, data_exp_factors, term, next_degree, expected_result):
+        d_max = 1
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.X_train = X_train
+        dipnn.Y_train = Y_train
+        dipnn.m = 2
+        dipnn.n = 2
+        derivative_value = dipnn.compute_derivative(term, next_degree, data_exp_factors)
+        assert_almost_equal(derivative_value, expected_result, decimal=3)
+
+    
+    @parameterized.expand([
+    [np.array([[1.0,1.0,1.0,1.0],[1.0,0.0,0.0,0.0]]), np.array([1.0,-1.0]), np.array([1.0,1.0,1.0,0.2]),  np.array([1.0,1.0,1.0])],
+    [np.array([[1.0,1.0,1.0,1.0],[1.0,0.0,1.0,0.0]]), np.array([-1.0,-1.0]), np.array([1.0,0.1,2.0,0.2]), np.array([1.0,2.0])]])   
+    def test_prune_terms_and_features(self, X_train_cr, Y_train, beta, expected_result):
+        d_max = 1
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.X_train_cr = X_train_cr
+        dipnn.Y_train = Y_train
+        dipnn.coeff_magnitude_th = 0.5
+        dipnn.beta_optimal = beta
+        dipnn.w_optimal = beta
+        dipnn.m = 2
+        dipnn.n = 2
+        dipnn.terms = [[0],[1,1],[2,2],[1,2]]
+        dipnn.prune_terms_and_features()
+        are_identical = np.array_equal(np.array(dipnn.beta_optimal), np.array(expected_result))
+        self.assertTrue(are_identical)
+        are_identical = np.array_equal(np.array(dipnn.beta_optimal), np.array(expected_result))
+        self.assertTrue(are_identical)
+
+    @parameterized.expand([
+    [[-0.1,-5.0, -0.3,-1.0],  [[1,1],[1,2]]],
+    [[-10.1,-2.0, -0.3,-1.0], [[0],[1,1]]]])   
+    def test_get_top_terms_by_derivative(self, derivative_values, expected_result):
+        d_max = 1
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        new_terms = [[0],[1,1],[2,2],[1,2]]
+        derivative_values = [-0.1,-5.0, -0.3,-1.0]
+        no_terms_to_return = 2
+        top_terms = dipnn.get_top_terms_by_derivative(new_terms, derivative_values, no_terms_to_return)
+        are_identical = np.array_equal(np.array(top_terms), np.array(expected_result))
+        self.assertTrue(are_identical)
