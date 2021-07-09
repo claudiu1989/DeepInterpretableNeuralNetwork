@@ -38,20 +38,23 @@ class TestDipnn(unittest.TestCase):
         self.assertEqual(dipnn.max_no_terms,max_no_terms)
         self.assertEqual(dipnn.growth_policy,growth_policy)
 
-    def test_compute_objective_function(self):
-        d_max = 1
-        balance = 1.0
-        lambda_param = 1.0
-        ro = 1.0/4.0
-        fixed_margin = True
-        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.02, coeff_magnitude_th=0.02, 
-                                            max_no_terms_per_iteration=20, max_no_terms=300, growth_policy=GrowthPolicy.SELECT_BY_DERIVATIVE)
-
-        m = 2
-        n = 4
-        w = np.array([1.0,1.0,1.0,1.0])
-        X_train_cr, Y_train = TestDipnn.create_test_data()
-        cr_degrees_limits = [4]
-        cr_degree = 1
+    @parameterized.expand([
+        [np.array([1.0,1.0,1.0,1.0]), np.array([[1.0,0.0,1.0,0.0],[0.0,1.0,1.0,1.0]]), np.array([1.0,-1.0]), 2, 4, [4], 1, 1.0,  True, 0.25, 1.0, 16.365],
+        [np.array([1.0,1.0,1.0,1.0]), np.array([[1.0,0.0,1.0,0.0],[0.0,1.0,1.0,1.0]]), np.array([1.0,-1.0]), 2, 4, [4], 1, 1.0,  True, 1.0, 1.0, 206.745],
+        [np.array([1.0,1.0,1.0,1.0]), np.array([[1.0,0.0,1.0,0.0],[0.0,1.0,1.0,1.0]]), np.array([1.0,-1.0]), 2, 4, [4], 1, 1.0,  False, 0.25, 1.0, 16.365]])
+    def test_compute_objective_function(self,w, X_train_cr, Y_train, m, n, cr_degrees_limits, cr_degree, lambda_param, fixed_margin, ro, balance, expected_value):        
         obj_value = DeepInterpretablePolynomialNeuralNetwork.objective_function(w, X_train_cr, Y_train, m, n, cr_degrees_limits, cr_degree, lambda_param, fixed_margin, ro, balance)
-        assert_almost_equal(obj_value, 16.365,decimal=3)
+        assert_almost_equal(obj_value, expected_value,decimal=3)
+
+    @parameterized.expand([
+        [np.array([[1.0,1.0,1.0,1.0],[0.0,0.0,1.0,1.0],[0.0,0.0,1.0,1.0]]), [[1.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0],[0.0,0.0,1.0,1.0,1.0,1.0,0.0,0.0],[0.0,0.0,1.0,1.0,1.0,1.0,0.0,0.0]]]])
+    def test_add_negated_variables(self, X, expected_result):
+        d_max = 1
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 1.0
+        fixed_margin = False
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        X_with_negates = dipnn.add_negated_variables(X)
+        are_identical = np.array_equal(np.array(X_with_negates), np.array(expected_result))
+        self.assertTrue(are_identical)
