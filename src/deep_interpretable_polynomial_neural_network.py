@@ -312,12 +312,26 @@ class DeepInterpretablePolynomialNeuralNetwork:
             return False
 
     def get_top_terms_by_derivative(self, new_terms, derivative_values, no_terms_to_return):
+        """ Get the terms corresponding to the features that have the biggest (in absolute value) derivatives
+            Args:
+             new_terms (list of lists of integers) the new terms
+             derivative_values (1 dimensional np array with negative float values) the partial derivatives
+             no_terms_to_return (int) no of terms to return
+            Returns:
+              list of lists of integers- a subset of no_terms_to_return terms from new_terms
+        """
         derivative_values_new_terms = list(zip(derivative_values, new_terms))
-        # Sort by derivative value, in descending order
-        derivative_values_new_terms.sort(reverse = True)
+        # Sort by derivative value (which are negative), in ascending order
+        derivative_values_new_terms.sort()
         return [derivative_term[1] for derivative_term in derivative_values_new_terms[:no_terms_to_return]]
 
     def prune_terms_and_features(self):
+        """ Remove the features that have a small contribution
+            Args:
+             -
+            Returns:
+             -
+        """
         indices_to_keep = self.beta_optimal >= self.coeff_magnitude_th
         self.beta_optimal = self.beta_optimal[indices_to_keep]
         self.w_optimal = self.w_optimal[indices_to_keep]
@@ -334,13 +348,27 @@ class DeepInterpretablePolynomialNeuralNetwork:
             return True
        
     def compute_derivative(self, term, next_degree, data_exp_factors):
+        """ Compute the partial derivative with respect to a feature ('term')
+            Args:
+             term: (list of integers) the variables in the current term
+             next_degree: (int) the degree of the term
+             data_exp_factors ( 1 dimensional np array with float values) the values computed by 'compute_exp_factors_derivative'
+            Returns:
+             (float) the value of the partial derivative
+        """
         new_features = [np.prod(x[term]) for x in self.X_train]
-        y_ix_dij = self.Y_train * new_features
-        data_part = (-2.0/float(self.m))*np.dot(y_ix_dij, data_exp_factors)
+        y_ix_dki = self.Y_train * new_features
+        data_part = (-2.0/float(self.m))*np.dot(y_ix_dki, data_exp_factors)
         regularization_part = np.sqrt((next_degree/float(self.m))*np.log(2.718*(2.0*self.n + next_degree - 1)/next_degree))
         return data_part + self.lambda_param * regularization_part
     
     def compute_exp_factors_derivative(self):
+        """ Compute the 'exponential' factors that appear in the partial derivative. They are common for all terms, at a given iteration
+            Args:
+            -
+            Returns:
+            1 dimensional np array with float values- the values of the factors for all training points
+        """
         balanced_Y_train = np.array([self.balance * y if y > 0.0 else y for y in self.Y_train])
         cr_ro = self.ro
         sum_w = np.sum(self.beta_optimal)
