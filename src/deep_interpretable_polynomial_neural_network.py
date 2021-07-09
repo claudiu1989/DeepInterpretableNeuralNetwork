@@ -174,6 +174,23 @@ class DeepInterpretablePolynomialNeuralNetwork:
         return beta_optimal
 
     def objective_function(w, X_train_cr, Y_train, m, n, cr_degrees_limits, cr_degree, lambda_param, fixed_margin, ro, balance):
+        """ Computes the objective function.
+            Args:
+            w: (1 dimensional np array with float values) the current parameters ("beta", in the paper).
+            X_train_cr: (2 dimensional np array with float values) current training data features
+            Y_train: (1 dimensional np array with float values, 1.0 and -1.0)  training data labels
+            m: (int) no. data points
+            n: (int) no. of variables
+            cr_degrees_limits: (list of integers) the start index for the terms of each degree 
+            (e.g. [2,5] means that from 0 to 1 the terms have a fixed degree, and from 2 to 4 the terms have a higher degree)
+            cr_degree: (int) max current degree
+            lambda_param: (float) the regularization hyperparameter
+            fixed_margin: (bool) if true, a fixed margin is used
+            ro: (float) the margin; used only if fixed_margin=True or if the computed margin is invalid
+            balance: (float) the balance hyperparameter
+            Returns:
+            float, the value of the objective function
+        """
         balanced_Y_train = np.array([balance * y if y > 0.0 else y for y in Y_train])
         cr_ro = ro
         sum_w = np.sum(w)
@@ -335,6 +352,13 @@ class DeepInterpretablePolynomialNeuralNetwork:
         return data_exp_factors
 
     def add_negated_variables(self, X):
+        """ Adds the 'negated' variables.
+            Args:
+            X: 2 dimensional np array with float values.
+
+            Returns:
+            2 dimensional np array with float values
+        """
         X_all = []
         for x in X:
             new_x = []
@@ -345,6 +369,12 @@ class DeepInterpretablePolynomialNeuralNetwork:
         return np.array(X_all)
     
     def set_to_default(self):
+        """ Set to default data/internal variables
+            Args:
+            -
+            Returns:
+            -
+        """
          # Training data- these will remain fixed during training
         self.X_train = np.array([])
         self.Y_train = np.array([])
