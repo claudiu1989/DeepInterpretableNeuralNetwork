@@ -235,3 +235,49 @@ class TestDipnn(unittest.TestCase):
         dipnn.generate_all_terms(d_max)
         are_identical = np.array_equal(np.array(dipnn.cr_degrees_limits), np.array(expected_result))
         self.assertTrue(are_identical)
+
+    @parameterized.expand([
+    [[[1,1],[0,2]],  np.array([[1.0,2.0,1.0,1.0,4.0,1.0],[1.0,0.0,0.0,0.0, 0.0, 0.0]])]])   
+    def test_add_new_features(self, terms, expected_result):
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        d_max = 2 
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.n = 2
+        dipnn.X_train_cr = np.array([[1.0,2.0,1.0,1.0],[1.0,0.0,0.0,0.0]])
+        dipnn.X_train = np.array([[1.0,2.0,1.0,1.0],[1.0,0.0,0.0,0.0]])
+        dipnn.add_new_features(terms)
+        are_identical = np.array_equal(np.array(dipnn.X_train_cr), np.array(expected_result))
+        self.assertTrue(are_identical)
+
+    @parameterized.expand([
+    [np.array([1.0,0.1,2.0,0.2]),  np.array([1.0,0.1,0.2,0.1,4.0])]])   
+    def test_compute_features_data_point(self, x, expected_result):
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        d_max = 2 
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.n = 2
+        dipnn.terms = [[0],[1],[3], [0,1], [2,2]]
+        features = dipnn.compute_features_data_point(x)
+        are_identical = np.array_equal(features, np.array(expected_result))
+        self.assertTrue(are_identical)
+
+    @parameterized.expand([
+    [np.array([[1.0,0.1,2.0,0.2],[1.0,0.1,0.5,0.2]]),  np.array([[1.0,0.1,0.2,0.1,4.0],[1.0,0.1,0.2,0.1,0.25]])]])   
+    def test_compute_features(self, X, expected_result):
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        d_max = 2 
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.n = 2
+        dipnn.terms = [[0],[1],[3], [0,1], [2,2]]
+        features = dipnn.compute_features(X)
+        are_identical = np.array_equal(features, np.array(expected_result))
+        self.assertTrue(are_identical)
