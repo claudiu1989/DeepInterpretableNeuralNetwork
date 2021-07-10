@@ -250,65 +250,77 @@ class DeepInterpretablePolynomialNeuralNetwork:
         return self.terms
     
     def add_terms_and_features_of_next_degree(self, next_degree):
+        """ Add the terms of next degree, and the corresponding features.
+            Args:
+              next_degree (int) the degree of the terms that will be added
+            Returns:
+              bool- true if new terms were added, false otherwise
+        """
         # All variables indices, including the negates
         indexes = range(2*self.n)
         # Add the terms of next degree
         new_terms = []
         # Add the non-zero derivative values 
         derivative_values = []
-        # Compute and cache the values needed to compute the partial derivative
-        # for all new term
-        data_exp_factors = self.compute_exp_factors_derivative()
-        # todo: improve efficiency
-        for term in self.terms:
-            for i in indexes:
-                new_term = term.copy()
-                # Create the new term
-                new_term.append(i) 
-                # Check if it is already in the list (the terms are sorted)
-                new_term.sort()
-                are_identical = False
-                no_new_terms = len(new_terms)
-                k = 0
-                while k < no_new_terms and not are_identical:
-                    are_identical = np.array_equal(np.array(new_terms[k]), np.array(new_term))
-                    k = k + 1
-                if not are_identical:
-                    derivative_value = self.compute_derivative(new_term, next_degree, data_exp_factors)
-                    if derivative_value < 0 and np.abs(derivative_value) > self.derivative_magnitude_th:
-                        # Add the derivative value
-                        derivative_values.append(derivative_value)
-                        # Add the new term
-                        new_terms.append(new_term)          
-        
+        # Compute the max no of terms that can be added
         maximum_no_terms_to_add = min(self.max_no_terms_per_iteration, self.max_no_terms - len(self.terms))
-        new_terms_to_add = []
-        if maximum_no_terms_to_add > 0 and len(new_terms) <= maximum_no_terms_to_add:
-            new_terms_to_add = new_terms
-        if maximum_no_terms_to_add > 0 and len(new_terms) > maximum_no_terms_to_add:
-            new_terms_to_add = self.get_top_terms_by_derivative(new_terms, derivative_values, maximum_no_terms_to_add)
-        self.terms.extend(new_terms_to_add)
-        # Set to zero the coefficients of the new terms
-        no_new_terms = len(new_terms_to_add)
-        self.beta_optimal = np.append(self.beta_optimal, np.zeros(no_new_terms))
-        self.w_optimal = np.append(self.w_optimal, np.zeros(no_new_terms))
-        # Compute the new features and add them to self.X_train_cr
-        self.add_new_features(new_terms_to_add)
-        # The new number of features
-        self.no_features = len(self.terms)
-        # Compute the indices ranges for terms of each degree, if new terms were added
-        if new_terms_to_add:
-            cr_degree = 1
-            self.cr_degrees_limits = []
-            for i,term in enumerate(self.terms):
-                if len(term) > cr_degree:
-                    self.cr_degrees_limits.append(i)
-                    cr_degree = len(term)
-            self.cr_degrees_limits.append(len(self.terms))
-            # New terms were added, continue training
-            return True 
+        if maximum_no_terms_to_add > 0:
+            maximum_no_terms_to_add = min(self.max_no_terms_per_iteration, self.max_no_terms - len(self.terms))
+            # Compute and cache the values needed to compute the partial derivative
+            # for all new term
+            data_exp_factors = self.compute_exp_factors_derivative()
+            # todo: improve efficiency
+            for term in self.terms:
+                for i in indexes:
+                    new_term = term.copy()
+                    # Create the new term
+                    new_term.append(i) 
+                    # Check if it is already in the list (the terms are sorted)
+                    new_term.sort()
+                    are_identical = False
+                    no_new_terms = len(new_terms)
+                    k = 0
+                    while k < no_new_terms and not are_identical:
+                        are_identical = np.array_equal(np.array(new_terms[k]), np.array(new_term))
+                        k = k + 1
+                    if not are_identical:
+                        derivative_value = self.compute_derivative(new_term, next_degree, data_exp_factors)
+                        if derivative_value < 0 and np.abs(derivative_value) > self.derivative_magnitude_th:
+                            # Add the derivative value
+                            derivative_values.append(derivative_value)
+                            # Add the new term
+                            new_terms.append(new_term)          
+            
+            new_terms_to_add = []
+            if len(new_terms) <= maximum_no_terms_to_add:
+                new_terms_to_add = new_terms
+            if len(new_terms) > maximum_no_terms_to_add:
+                new_terms_to_add = self.get_top_terms_by_derivative(new_terms, derivative_values, maximum_no_terms_to_add)
+            self.terms.extend(new_terms_to_add)
+            # Set to zero the coefficients of the new terms
+            no_new_terms = len(new_terms_to_add)
+            self.beta_optimal = np.append(self.beta_optimal, np.zeros(no_new_terms))
+            self.w_optimal = np.append(self.w_optimal, np.zeros(no_new_terms))
+            # Compute the new features and add them to self.X_train_cr
+            self.add_new_features(new_terms_to_add)
+            # The new number of features
+            self.no_features = len(self.terms)
+            # Compute the indices ranges for terms of each degree, if new terms were added
+            if new_terms_to_add:
+                cr_degree = 1
+                self.cr_degrees_limits = []
+                for i,term in enumerate(self.terms):
+                    if len(term) > cr_degree:
+                        self.cr_degrees_limits.append(i)
+                        cr_degree = len(term)
+                self.cr_degrees_limits.append(len(self.terms))
+                # New terms were added, continue training
+                return True 
+            else:
+                # No new terms, can stop now
+                return False
         else:
-             # No new terms, can stop now
+            # No new terms
             return False
 
     def get_top_terms_by_derivative(self, new_terms, derivative_values, no_terms_to_return):
