@@ -140,11 +140,9 @@ class TestDipnn(unittest.TestCase):
         are_identical = np.array_equal(np.array(top_terms), np.array(expected_result))
         self.assertTrue(are_identical)
     
-    
-
     @parameterized.expand([
     [[[0],[1],[2],[3]],  [[0],[1],[2],[3],[0,0],[0,1],[0,2],[0,3],[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]]]])   
-    def test_add_terms_and_features_of_next_degree(self, terms, expected_result):
+    def test_add_terms_and_features_of_next_degree1(self, terms, expected_result):
         d_max = 1
         balance = 1.5
         lambda_param = 1.0
@@ -162,3 +160,27 @@ class TestDipnn(unittest.TestCase):
         dipnn.add_terms_and_features_of_next_degree(2)
         are_identical = np.array_equal(np.array(dipnn.terms), np.array(expected_result))
         self.assertTrue(are_identical)
+
+    @parameterized.expand([
+    [np.array([1.0,0.1,2.0,0.2]),  np.array([1.0,0.1,2.0,0.2,0.0,0.0,0.0,0.0])]])   
+    def test_add_terms_and_features_of_next_degree2(self, beta_optimal, expected_result):
+        d_max = 1
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.n = 2
+        dipnn.terms = [[0],[1],[2],[3]]
+        dipnn.beta_optimal = beta_optimal
+        dipnn.w_optimal = beta_optimal
+        dipnn.X_train = np.array([[1.0,1.0,1.0,1.0],[1.0,0.0,0.0,0.0]])
+        dipnn.X_train_cr = np.array([[1.0,1.0,1.0,1.0],[1.0,0.0,0.0,0.0]])
+        dipnn.compute_exp_factors_derivative = mock_compute_exp_factors_derivative
+        dipnn.compute_derivative= mock_compute_derivative
+        dipnn.max_no_terms_per_iteration = 4
+        dipnn.max_no_terms = 100
+        dipnn.add_terms_and_features_of_next_degree(2)
+        are_identical = np.array_equal(np.array(dipnn.beta_optimal), np.array(expected_result))
+        self.assertTrue(are_identical)
+        self.assertEqual(dipnn.no_features,8)
