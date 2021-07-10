@@ -233,21 +233,27 @@ class DeepInterpretablePolynomialNeuralNetwork:
             self.X_train_cr = np.array([np.append(x_train_cr, np.prod(x_train[new_term])) for x_train_cr,x_train in zip(self.X_train_cr,self.X_train)])
    
     def generate_all_terms(self, cr_d_max):
+        """ Generate all terms having degree at most cr_d_max.
+            Args:
+              cr_d_max (int) the maximum degree
+            Returns:
+              list of lists of integers- the list of terms
+        """
         # All variables indices, including the negates
         indexes = range(2*self.n)
-        self.terms = []
+        all_terms = []
         for cr_d in range(cr_d_max):
             all_terms_fixed_degree = list(combinations_with_replacement(indexes,cr_d+1))
-            self.terms.extend([list(term) for term in all_terms_fixed_degree])
+            all_terms.extend([list(term) for term in all_terms_fixed_degree])
         # Compute the indices ranges for terms of each degree- todo: remove this part and store the indices during generation
         cr_degree = 1
         self.cr_degrees_limits = []
-        for i,term in enumerate(self.terms):
+        for i,term in enumerate(all_terms):
             if len(term) > cr_degree:
                 self.cr_degrees_limits.append(i)
                 cr_degree = len(term)
-        self.cr_degrees_limits.append(len(self.terms))
-        return self.terms
+        self.cr_degrees_limits.append(len(all_terms))
+        return all_terms
     
     def add_terms_and_features_of_next_degree(self, next_degree):
         """ Add the terms of next degree, and the corresponding features.
@@ -269,8 +275,11 @@ class DeepInterpretablePolynomialNeuralNetwork:
             # Compute and cache the values needed to compute the partial derivative
             # for all new term
             data_exp_factors = self.compute_exp_factors_derivative()
+            start_index_max_degree_terms = 0
+            if len(self.cr_degrees_limits)>1:
+                start_index_max_degree_terms = self.cr_degrees_limits[-2]
             # todo: improve efficiency
-            for term in self.terms:
+            for term in self.terms[start_index_max_degree_terms:]:
                 for i in indexes:
                     new_term = term.copy()
                     # Create the new term
