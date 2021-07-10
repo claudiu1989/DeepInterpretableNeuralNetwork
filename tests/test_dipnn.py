@@ -134,7 +134,6 @@ class TestDipnn(unittest.TestCase):
         fixed_margin = True
         dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
         new_terms = [[0],[1,1],[2,2],[1,2]]
-        derivative_values = [-0.1,-5.0, -0.3,-1.0]
         no_terms_to_return = 2
         top_terms = dipnn.get_top_terms_by_derivative(new_terms, derivative_values, no_terms_to_return)
         are_identical = np.array_equal(np.array(top_terms), np.array(expected_result))
@@ -184,3 +183,31 @@ class TestDipnn(unittest.TestCase):
         are_identical = np.array_equal(np.array(dipnn.beta_optimal), np.array(expected_result))
         self.assertTrue(are_identical)
         self.assertEqual(dipnn.no_features,8)
+
+    @parameterized.expand([
+    [2,  [[0],[1],[2],[3],[0,0],[0,1],[0,2],[0,3],[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]]]])   
+    def test_generate_all_terms1(self, d_max, expected_result):
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.terms = [[0],[1],[2],[3]]
+        dipnn.n = 2
+        dipnn.generate_all_terms(d_max)
+        are_identical = np.array_equal(np.array(dipnn.terms), np.array(expected_result))
+        self.assertTrue(are_identical)
+
+    @parameterized.expand([
+    [2,  [4,8]]])   
+    def test_generate_all_terms2(self, d_max, expected_result):
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.terms = [[0],[1],[2],[3]]
+        dipnn.n = 2
+        dipnn.generate_all_terms(d_max)
+        are_identical = np.array_equal(np.array(dipnn.cr_degrees_limits), np.array(expected_result))
+        self.assertTrue(are_identical)
