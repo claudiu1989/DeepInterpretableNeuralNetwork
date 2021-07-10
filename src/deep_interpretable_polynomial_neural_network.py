@@ -213,6 +213,12 @@ class DeepInterpretablePolynomialNeuralNetwork:
         return data_part + lambda_param * regularization_part
 
     def compute_features_data_point(self, x):
+        """ Compute all features for a data point.
+            Args:
+              x: (1 dimensional np array)- a data point
+            Returns:
+              1 dimensional np array- all features for the current data point
+        """
         x_features = []
         for term in self.terms:
             feature = np.prod(x[term])
@@ -220,6 +226,12 @@ class DeepInterpretablePolynomialNeuralNetwork:
         return np.array(x_features)
 
     def compute_features(self, X):
+        """ Compute all features for the dataset
+            Args:
+              x: (2 dimensional np array)- a dataset
+            Returns:
+              2 dimensional np array- all features, for all data points
+        """
         # For each data point in set X
         X_features = []
         for x in X:
@@ -228,6 +240,12 @@ class DeepInterpretablePolynomialNeuralNetwork:
         return np.array(X_features)
 
     def add_new_features(self, new_terms):
+        """ Add the features for the new terms.
+            Args:
+              new_terms: (list of lists of integers) the new terms
+            Returns:
+              -
+        """
         # todo- implement more efficiently
         for new_term in new_terms:
             self.X_train_cr = np.array([np.append(x_train_cr, np.prod(x_train[new_term])) for x_train_cr,x_train in zip(self.X_train_cr,self.X_train)])
