@@ -281,3 +281,30 @@ class TestDipnn(unittest.TestCase):
         features = dipnn.compute_features(X)
         are_identical = np.array_equal(features, np.array(expected_result))
         self.assertTrue(are_identical)
+
+    @parameterized.expand([
+    [True,  np.array([0.999, 0.0])],[False,  np.array([0.999, 0.0])]])   
+    def test_train_phase1(self, fixed_margin, expected_result):
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        d_max = 2 
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.fixed_margin = True
+        dipnn.no_features = 2
+        dipnn.X_train_cr = np.array([[1.0,0.0],[0.0,0.0]])
+        dipnn.Y_train = np.array([1.0,1.0])
+        dipnn.m = 2
+        dipnn.n = 1
+        dipnn.cr_degrees_limits = [2]
+        dipnn.cr_degree = 1
+        dipnn.lambda_param = 1.0
+        dipnn.fixed_margin = fixed_margin
+        dipnn.ro = 1.0
+        dipnn.balance = 1.0
+        dipnn.beta_optimal = np.array([0.0,0.0])
+        optimal_beta = dipnn.train_phase1()
+        assert_almost_equal(np.sum(optimal_beta), dipnn.ro, decimal=3)
+        for beta_computed, beta_expected in zip(optimal_beta, expected_result):
+            assert_almost_equal(beta_computed, beta_expected, decimal=3)
