@@ -161,6 +161,12 @@ class DeepInterpretablePolynomialNeuralNetwork:
         print(f'ROC AUC score:{sum_roc_auc/float(no_runs)}')
 
     def train_phase1(self):
+        """ The first phase of the training iteration.
+            Args:
+             - 
+            Returns:
+            1 dimensional np array with float values- the optimal parameters values
+        """
         if not self.fixed_margin:
             bnds = tuple([(0.0, None)]*self.no_features)
             res = minimize(DeepInterpretablePolynomialNeuralNetwork.objective_function, 
@@ -210,6 +216,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
         d = np.array(range(cr_degree))+1.0
         regularization_factors = np.sqrt((d/float(m))*np.log(2.718*(2.0*n + d - 1)/d))
         regularization_part = wd.dot(regularization_factors)
+        print(f'Objective function: {data_part + lambda_param * regularization_part}')
         return data_part + lambda_param * regularization_part
 
     def compute_features_data_point(self, x):
