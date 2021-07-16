@@ -308,3 +308,37 @@ class TestDipnn(unittest.TestCase):
         assert_almost_equal(np.sum(optimal_beta), dipnn.ro, decimal=3)
         for beta_computed, beta_expected in zip(optimal_beta, expected_result):
             assert_almost_equal(beta_computed, beta_expected, decimal=3)
+
+    @parameterized.expand([
+    [np.array([[1.0,0.1],[0.0,0.91]]),  np.array([1.0, 0.0]), np.array([1.0, 0.0])],
+    [np.array([[0.501,0.0],[0.4,0.91]]),  np.array([0.501, 0.4]), np.array([1.0, 0.0])]])   
+    def test_private_predict(self, X_test, expected_result_Y_predicted, expected_result_Y_predicted_binary):
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        d_max = 2 
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.w_optimal = np.array([1.0, 0.0])
+        Y_predicted_binary, Y_predicted = dipnn._DeepInterpretablePolynomialNeuralNetwork__predict(X_test)
+        are_identical = np.array_equal(Y_predicted, np.array(expected_result_Y_predicted))
+        self.assertTrue(are_identical)
+        are_identical = np.array_equal(Y_predicted_binary, np.array(expected_result_Y_predicted_binary))
+        self.assertTrue(are_identical)
+
+    @parameterized.expand([
+    [np.array([[0.9,0.5],[0.0,0.91]]),  np.array([0.675, 0.0]), np.array([1.0, 0.0])]])   
+    def test_predict(self, X_test, expected_result_Y_predicted, expected_result_Y_predicted_binary):
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        d_max = 2 
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.w_optimal = np.array([0.5, 0.0, 0.5])
+        dipnn.terms = [[0], [1], [0,1]]
+        Y_predicted_binary, Y_predicted = dipnn.predict(X_test)
+        are_identical = np.array_equal(Y_predicted, np.array(expected_result_Y_predicted))
+        self.assertTrue(are_identical)
+        are_identical = np.array_equal(Y_predicted_binary, np.array(expected_result_Y_predicted_binary))
+        self.assertTrue(are_identical)
