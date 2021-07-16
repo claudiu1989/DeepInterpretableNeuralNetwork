@@ -86,21 +86,34 @@ class DeepInterpretablePolynomialNeuralNetwork:
             # Increase counter
             i = i + 1
 
-    def predict(self, X_test):
+    def __predict(self, X_test):
+        """ Compute predictions for new data, represented in the features space.
+            Args:
+             X_test: (1 dimensional np array with float values)- the test data, in the features space
+            Returns:
+             Two 1 dimensional np arrays with float values- the binary (0/1) predictions and the "scores" (values from [0,1])
+        """
         Y_predicted = X_test.dot(self.w_optimal)
-        Y_predicted_binary = []
-        for y in Y_predicted:
-            if y>0.5: 
-                Y_predicted_binary.append(1.0) 
-            else:
-                Y_predicted_binary.append(-1.0) 
+        Y_predicted_binary = np.around(Y_predicted)
         return np.array(Y_predicted_binary), Y_predicted
+    
+    def predict(self, X_test):
+        """ Compute predictions for new data.
+            Args:
+             X_test: (1 dimensional np array with float values)- the test data
+            Returns:
+             Two 1 dimensional np arrays with float values- the binary (0/1) predictions and the "scores" (values from [0,1])
+        """
+        X_test_with_negated = self.add_negated_variables(X_test)
+        X_test_features = self.compute_features(X_test_with_negated)
+        Y_predicted_binary, Y_predicted = self.__predict(X_test_features)
+        return Y_predicted_binary, Y_predicted
 
     def test(self, X_test, Y_test):
         self.X_test = self.add_negated_variables(X_test)
         self.X_test_cr = self.compute_features(self.X_test)
         self.Y_test = Y_test
-        Y_predicted_binary,Y_predicted = self.predict(self.X_test_cr)
+        Y_predicted_binary,Y_predicted = self.__predict(self.X_test_cr)
         no_errors = 0.0 
         N = 0.0 
         P = 0.0 
