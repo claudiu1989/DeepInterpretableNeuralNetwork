@@ -1,7 +1,5 @@
 import numpy as np
 from scipy.optimize import minimize
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import roc_auc_score
 from enum import Enum
 from itertools import combinations_with_replacement
 
@@ -37,11 +35,21 @@ class DeepInterpretablePolynomialNeuralNetwork:
         self.set_to_default()
 
     def train(self, X_train, Y_train):
+        """ The method  for model training.
+            Args:
+             X_train:  (2 dimensional np array with float values)- the training data input values; each row corresponds to a data point; 
+                                                                   all values must be from the interval [0,1]  
+             Y_train:  (1 dimensional np array with float values)- the training data labels; each entry corresponds to a data point; 
+                                                                   all values must be from the set {0,1}  
+            Returns:                                         
+             -
+        """
         # Initialisation
         self.n = len(X_train[0])
         self.m = len(Y_train)
         self.X_train = self.add_negated_variables(X_train)
-        self.Y_train = Y_train
+        # Transform the labels fro {0,1} to {-1,1}
+        self.Y_train = 2.0*Y_train - 1
         if self.growth_policy == GrowthPolicy.ALL_TERMS:
             self.terms = self.generate_all_terms(self.d_max)
             self.cr_degree = self.d_max
@@ -86,6 +94,25 @@ class DeepInterpretablePolynomialNeuralNetwork:
             # Increase counter
             i = i + 1
 
+    def train_phase1(self):
+        """ The first phase of the training iteration.
+            Args:
+             - 
+            Returns:
+            1 dimensional np array with float values- the optimal parameters values
+        """
+        if not self.fixed_margin:
+            bnds = tuple([(0.0, None)]*self.no_features)
+            res = minimize(DeepInterpretablePolynomialNeuralNetwork.objective_function, 
+                           args=(self.X_train_cr, self.Y_train, self.m, self.n, self.cr_degrees_limits, self.cr_degree, self.lambda_param, self.fixed_margin, self.ro, self.balance), x0=self.beta_optimal, bounds=bnds)
+        else:      
+            bnds = tuple([(0.0, 1.0/float(self.ro))]*self.no_features)
+            cons = ({'type': 'eq', 'fun': lambda beta: 1.0/float(self.ro) - np.sum(beta)})
+            res = minimize(DeepInterpretablePolynomialNeuralNetwork.objective_function, 
+                           args=(self.X_train_cr, self.Y_train, self.m, self.n, self.cr_degrees_limits, self.cr_degree, self.lambda_param, self.fixed_margin, self.ro, self.balance), x0=self.beta_optimal, bounds=bnds, constraints=cons)
+        beta_optimal = res.x
+        return beta_optimal
+
     def __predict(self, X_test):
         """ Compute predictions for new data, represented in the features space.
             Args:
@@ -108,89 +135,6 @@ class DeepInterpretablePolynomialNeuralNetwork:
         X_test_features = self.compute_features(X_test_with_negated)
         Y_predicted_binary, Y_predicted = self.__predict(X_test_features)
         return Y_predicted_binary, Y_predicted
-
-    def test(self, X_test, Y_test):
-        self.X_test = self.add_negated_variables(X_test)
-        self.X_test_cr = self.compute_features(self.X_test)
-        self.Y_test = Y_test
-        Y_predicted_binary,Y_predicted = self.__predict(self.X_test_cr)
-        no_errors = 0.0 
-        N = 0.0 
-        P = 0.0 
-        TN = 0.0
-        TP = 0.0
-        for y_p,y in zip(Y_predicted_binary,self.Y_test):
-            if y_p != y:
-                no_errors += 1.0
-            if y == 1.0:
-                P += 1.0
-                if y_p == 1.0:
-                    TP += 1.0
-            if y == -1.0:
-                N += 1.0
-                if y_p == -1.0:
-                    TN += 1.0
-        if P == 0.0:
-            TP_rate = 1.0
-        else:
-            TP_rate = TP/P
-        if N == 0.0:
-            TN_rate = 1.0
-        else:
-            TN_rate = TN/N
-        roc_auc_score_value = roc_auc_score([1.0 if y >= 1.0 else 0.0 for y in self.Y_test], Y_predicted)
-
-        return 1.0 - no_errors/float(len(Y_predicted_binary)), TP_rate, TN_rate, roc_auc_score_value
-    
-    def evaluate_multiple_times(self, X, Y, no_runs):
-        sum_acc = 0.0
-        sum_TP_rate = 0.0
-        sum_TN_rate = 0.0
-        sum_roc_auc = 0.0
-        accuracy_list = []
-        for k in range(no_runs):
-            # re-init
-            self.set_to_default()
-            X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.20)
-            self.train(X_train,Y_train)
-            acc, TP_rate, TN_rate, roc_auc = self.test(X_test, Y_test)
-            accuracy_list.append(acc)
-            sum_acc += acc
-            sum_TP_rate += TP_rate
-            sum_TN_rate += TN_rate
-            sum_roc_auc += roc_auc
-        avg_acc = sum_acc/float(no_runs)
-        var_acc = (np.sum((np.array(accuracy_list) - avg_acc)**2))/float(no_runs) 
-        indices_to_remove = self.beta_optimal >= self.coeff_magnitude_th
-        self.w_optimal = self.w_optimal[indices_to_remove]
-        self.terms = np.array(self.terms)[indices_to_remove]
-        terms_w = zip(self.terms, self.w_optimal)
-        print('The terms and their coeffcients in the last iteration:')
-        print(list(terms_w))
-        print(f'\nAvg Acc:{avg_acc}')
-        print(f'Var Acc:{var_acc}')
-        print(f'Avg TP_rate:{sum_TP_rate/float(no_runs)}')
-        print(f'Avg TN_rate:{sum_TN_rate/float(no_runs)}')
-        print(f'ROC AUC score:{sum_roc_auc/float(no_runs)}')
-
-    def train_phase1(self):
-        """ The first phase of the training iteration.
-            Args:
-             - 
-            Returns:
-            1 dimensional np array with float values- the optimal parameters values
-        """
-        if not self.fixed_margin:
-            bnds = tuple([(0.0, None)]*self.no_features)
-            res = minimize(DeepInterpretablePolynomialNeuralNetwork.objective_function, 
-                           args=(self.X_train_cr, self.Y_train, self.m, self.n, self.cr_degrees_limits, self.cr_degree, self.lambda_param, self.fixed_margin, self.ro, self.balance), x0=self.beta_optimal, bounds=bnds)
-        else:      
-            bnds = tuple([(0.0, 1.0/float(self.ro))]*self.no_features)
-            cons = ({'type': 'eq', 'fun': lambda beta: 1.0/float(self.ro) - np.sum(beta)})
-            res = minimize(DeepInterpretablePolynomialNeuralNetwork.objective_function, 
-                           args=(self.X_train_cr, self.Y_train, self.m, self.n, self.cr_degrees_limits, self.cr_degree, self.lambda_param, self.fixed_margin, self.ro, self.balance), x0=self.beta_optimal, bounds=bnds, constraints=cons)
-        beta_optimal = res.x
-        return beta_optimal
 
     def objective_function(w, X_train_cr, Y_train, m, n, cr_degrees_limits, cr_degree, lambda_param, fixed_margin, ro, balance):
         """ Computes the objective function.
@@ -467,7 +411,6 @@ class DeepInterpretablePolynomialNeuralNetwork:
         self.Y_train = np.array([])
         # Test data - these will remain fixed during testing
         self.X_test = np.array([])
-        self.Y_test = np.array([])
          # Current training data- data with the current features - it will remain fixed during training
         self.X_train_cr = np.array([])
         # Current test data- data with the current features - it will remain fixed during test
