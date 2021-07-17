@@ -243,7 +243,7 @@ class TestDipnn(unittest.TestCase):
         lambda_param = 1.0
         ro = 0.5
         fixed_margin = True
-        d_max = 2 
+        d_max = 2
         dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
         dipnn.n = 2
         dipnn.X_train_cr = np.array([[1.0,2.0,1.0,1.0],[1.0,0.0,0.0,0.0]])
@@ -342,3 +342,18 @@ class TestDipnn(unittest.TestCase):
         self.assertTrue(are_identical)
         are_identical = np.array_equal(Y_predicted_binary, np.array(expected_result_Y_predicted_binary))
         self.assertTrue(are_identical)
+
+    @parameterized.expand([
+    [0.1]])   
+    def test_get_the_model_representation(self, coefficient_significance_threshold):
+        balance = 1.5
+        lambda_param = 1.0
+        ro = 0.5
+        fixed_margin = True
+        d_max = 2 
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro)
+        dipnn.w_optimal = np.array([0.0, 0.3, 0.3, 0.2, 0.2])
+        dipnn.n = 2
+        dipnn.terms = [[0], [1], [0,1],[0,2], [0,3]]
+        model_str = dipnn.get_the_model_representation(coefficient_significance_threshold)
+        self.assertEqual(model_str, '(0.3)x1+(0.3)x0*x1+(0.2)x0*(1-x0)+(0.2)x0*(1-x1)')
