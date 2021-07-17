@@ -48,7 +48,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
         self.n = len(X_train[0])
         self.m = len(Y_train)
         self.X_train = self.add_negated_variables(X_train)
-        # Transform the labels fro {0,1} to {-1,1}
+        # Transform the labels from {0,1} to {-1,1}
         self.Y_train = 2.0*Y_train - 1
         if self.growth_policy == GrowthPolicy.ALL_TERMS:
             self.terms = self.generate_all_terms(self.d_max)
@@ -66,7 +66,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
         terms_of_cr_degree_were_kept = True
         while i <= max_no_iterations and terms_of_cr_degree_were_kept and new_terms_added:
             # Phase 1
-            print(f'Start iteration {i}, phase 1')
+            print(f'Start phase 1 of iteration {i}')
             self.beta_optimal = self.train_phase1()
             sum_beta = np.sum(self.beta_optimal)
             if not self.fixed_margin:
@@ -81,7 +81,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
                 self.w_optimal = self.ro*self.beta_optimal
             # Phase 2
             if self.growth_policy == GrowthPolicy.SELECT_BY_DERIVATIVE:
-                print(f'Start iteration {i}, phase 2')
+                print(f'Start phase 2 of iteration {i}')
                 if self.cr_degree < self.d_max:
                     terms_of_cr_degree_were_kept = self.prune_terms_and_features()
                     if len(self.terms) < self.max_no_terms or self.max_no_terms < 0:
@@ -93,6 +93,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
                         break
             # Increase counter
             i = i + 1
+        print('\nThe training process finished with success!\n')
 
     def train_phase1(self):
         """ The first phase of the training iteration.
@@ -173,7 +174,6 @@ class DeepInterpretablePolynomialNeuralNetwork:
         d = np.array(range(cr_degree))+1.0
         regularization_factors = np.sqrt((d/float(m))*np.log(2.718*(2.0*n + d - 1)/d))
         regularization_part = wd.dot(regularization_factors)
-        print(f'Objective function: {data_part + lambda_param * regularization_part}')
         return data_part + lambda_param * regularization_part
 
     def compute_features_data_point(self, x):
@@ -398,7 +398,39 @@ class DeepInterpretablePolynomialNeuralNetwork:
             new_x.extend(neg_x)
             X_all.append(new_x)
         return np.array(X_all)
-    
+
+    def get_the_model_representation(self, coefficient_significance_threshold):
+        """ Create a string representation of the generated model.
+            Args:
+            coefficient_significance_threshold: (float)- a number from [0,1]; 
+                                                all terms with coefficients below coefficient_significance_threshold will be ignored.
+
+            Returns:
+             string- a representation of the model
+        """
+        terms_coeffs = zip(self.terms, self.w_optimal)
+        model_string = ''
+        for term, coeff in terms_coeffs:
+            term_string = ''
+            if coeff >= coefficient_significance_threshold:
+                for variable_index in term:
+                    if variable_index < self.n:
+                        if model_string == '':
+                            term_string += f'({coeff})x{variable_index}'
+                        elif term_string == '':
+                            term_string += f'+({coeff})x{variable_index}'
+                        else:
+                            term_string += f'*x{variable_index}'
+                    else:
+                        if model_string == '':
+                            term_string += f'({coeff})(1-x{variable_index-self.n})'
+                        elif term_string == '':
+                            term_string += f'+({coeff})(1-x{variable_index-self.n})'
+                        else:
+                            term_string += f'*(1-x{variable_index-self.n})'
+                model_string += term_string
+        return model_string
+
     def set_to_default(self):
         """ Set to default data/internal variables
             Args:
