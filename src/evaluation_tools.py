@@ -85,18 +85,18 @@ class EvaluationTools:
             sum_roc_auc += roc_auc
         avg_acc = sum_acc/float(no_runs)
         var_acc = (np.sum((np.array(accuracy_list) - avg_acc)**2))/float(no_runs) 
-        indices_to_remove = dipnn.beta_optimal >= dipnn.coeff_magnitude_th
-        dipnn.w_optimal = dipnn.w_optimal[indices_to_remove]
-        dipnn.terms = np.array(dipnn.terms, dtype=object)[indices_to_remove]
-        terms_w = zip(dipnn.terms, dipnn.w_optimal)
+        #indices_to_remove = dipnn.beta_optimal >= dipnn.coeff_magnitude_th
+        #dipnn.w_optimal = dipnn.w_optimal[indices_to_remove]
+        #dipnn.terms = np.array(dipnn.terms, dtype=object)[indices_to_remove]
+        #terms_w = zip(dipnn.terms, dipnn.w_optimal)
+        #print('The terms and their coeffcients in the last iteration:')
+        #print(list(terms_w))
         avg_training_time = sum(training_time)/float(no_runs)
         var_training_time = (np.sum((np.array(training_time) - avg_training_time)**2))/float(no_runs) 
         avg_test_time = sum(test_time)/float(no_runs)
         var_test_time = (np.sum((np.array(test_time) - avg_test_time)**2))/float(no_runs) 
         print('The model in the last iteration')
         print(dipnn.get_the_model_representation(coefficients_threshold, precision))
-        #print('The terms and their coeffcients in the last iteration:')
-        #print(list(terms_w))
         print(f'Average accuracy: {avg_acc}')
         print(f'Variance of accuracy: {var_acc}')
         print(f'Average true positive rate: {sum_TP_rate/float(no_runs)}')
