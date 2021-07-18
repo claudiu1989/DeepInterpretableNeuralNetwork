@@ -48,13 +48,14 @@ class EvaluationTools:
         return 1.0 - no_errors/float(len(Y_predicted_binary)), TP_rate, TN_rate, roc_auc_score_value
     
     @staticmethod
-    def evaluate_multiple_times(dipnn, X, Y, no_runs, test_size=0.2, coefficients_threshold=0.0):
+    def evaluate_multiple_times(dipnn, X, Y, no_runs, test_size=0.2, coefficients_threshold=0.0,precision=-1):
         """ A method for training and testing on a dataset multiple times. The data is split randomly in a training and a test datasets.
             Args:
              X:  (2 dimensional np array with float values)-  the data input values; each row corresponds to a data point; 
                                                               all values must be from the interval [0,1]  
              Y:  (1 dimensional np array with float values)-  the data labels; each entry corresponds to a data point; 
-                                                              all values must be from the set {0,1}  
+                                                              all values must be from the set {0,1}
+             precision: (int) - if positive, it represents the no. of decimals used for the coefficients representation; if -1, no rounding is performed  
             Returns:                                         
              -
         """
@@ -93,7 +94,7 @@ class EvaluationTools:
         avg_test_time = sum(test_time)/float(no_runs)
         var_test_time = (np.sum((np.array(test_time) - avg_test_time)**2))/float(no_runs) 
         print('The model in the last iteration')
-        print(dipnn.get_the_model_representation(coefficients_threshold))
+        print(dipnn.get_the_model_representation(coefficients_threshold, precision))
         #print('The terms and their coeffcients in the last iteration:')
         #print(list(terms_w))
         print(f'Average accuracy: {avg_acc}')

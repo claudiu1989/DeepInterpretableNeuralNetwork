@@ -401,16 +401,20 @@ class DeepInterpretablePolynomialNeuralNetwork:
             X_all.append(new_x)
         return np.array(X_all)
 
-    def get_the_model_representation(self, coefficient_significance_threshold):
+    def get_the_model_representation(self, coefficient_significance_threshold, precision=-1):
         """ Create a string representation of the generated model.
             Args:
             coefficient_significance_threshold: (float)- a number from [0,1]; 
                                                 all terms with coefficients below coefficient_significance_threshold will be ignored.
+            precision: (int) - if positive, it represents the no. of decimals used for the coefficients representation; if -1, no rounding is performed
 
             Returns:
              string- a representation of the model
         """
-        terms_coeffs = zip(self.terms, self.w_optimal)
+        rounded_w_optimal = self.w_optimal
+        if precision>0:
+            rounded_w_optimal = np.around(self.w_optimal, decimals=precision)
+        terms_coeffs = zip(self.terms, rounded_w_optimal)
         model_string = ''
         for term, coeff in terms_coeffs:
             term_string = ''
