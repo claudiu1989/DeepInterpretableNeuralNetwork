@@ -5,7 +5,8 @@ from itertools import combinations_with_replacement
 
 class GrowthPolicy(Enum):
     ALL_TERMS = 1
-    SELECT_BY_DERIVATIVE = 2
+    GROW = 2
+    PRUNE_AND_GROW = 3
 
 class DeepInterpretablePolynomialNeuralNetwork:
     def __init__(self, d_max, lambda_param, balance, fixed_margin=True, ro=1.0, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
@@ -80,10 +81,11 @@ class DeepInterpretablePolynomialNeuralNetwork:
             else:
                 self.w_optimal = self.ro*self.beta_optimal
             # Phase 2
-            if self.growth_policy == GrowthPolicy.SELECT_BY_DERIVATIVE:
+            if self.growth_policy == GrowthPolicy.GROW or self.growth_policy == GrowthPolicy.PRUNE_AND_GROW:
                 print(f'Start phase 2 of iteration {i}')
                 if self.cr_degree < self.d_max:
-                    terms_of_cr_degree_were_kept = self.prune_terms_and_features()
+                    if self.growth_policy == GrowthPolicy.PRUNE_AND_GROW:
+                        terms_of_cr_degree_were_kept = self.prune_terms_and_features()
                     if len(self.terms) < self.max_no_terms or self.max_no_terms < 0:
                         new_terms_added = self.add_terms_and_features_of_next_degree(self.cr_degree + 1)
                         self.cr_degree = self.cr_degree + 1
@@ -429,6 +431,8 @@ class DeepInterpretablePolynomialNeuralNetwork:
                         else:
                             term_string += f'*(1-x{variable_index-self.n})'
                 model_string += term_string
+        if model_string == '':
+            print('Warning: all coefficients are below the threshold!')
         return model_string
 
     def set_to_default(self):
