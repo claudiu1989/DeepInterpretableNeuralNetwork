@@ -18,14 +18,9 @@ def mock_compute_derivative(new_term, next_degree, data_exp_factors):
     return -1
 class TestDipnn(unittest.TestCase):
     
-    @staticmethod
-    def create_test_data():
-        X_train = np.array([[1.0,0.0,1.0,0.0],[0.0,1.0,1.0,1.0]])
-        Y_train = np.array([1.0,-1.0])
-        return X_train, Y_train
 
     @parameterized.expand([
-        [2, 5.0, 4.0,True,3.0,0.5,0.4,100,1000,GrowthPolicy.SELECT_BY_DERIVATIVE
+        [2, 5.0, 4.0,True,3.0,0.5,0.4,100,1000,GrowthPolicy.GROW
     ]])
     def test_init(self,d_max, lambda_param, balance, fixed_margin, ro, derivative_magnitude_th, coeff_magnitude_th, 
                  max_no_terms_per_iteration, max_no_terms, growth_policy):
