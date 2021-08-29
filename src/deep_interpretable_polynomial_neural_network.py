@@ -75,7 +75,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
                     self.ro = 1.0/sum_beta
                     self.w_optimal =self.ro*self.beta_optimal
                 else:
-                    print(f'Warning: The optimal vector of weights is an all-zeros vector.')
+                    print(f'Warning: The optimal vector of weights is an all-zeros vector. Check if the dataset is valid, in particular if both positive and negative labels are present.')
                     self.w_optimal = self.beta_optimal
                     self.ro = 0.0
             else:
@@ -340,7 +340,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
         indices_to_keep = self.beta_optimal >= self.coeff_magnitude_th
         self.beta_optimal = self.beta_optimal[indices_to_keep]
         self.w_optimal = self.w_optimal[indices_to_keep]
-        terms = np.array(self.terms)[indices_to_keep]
+        terms = np.array(self.terms, dtype=object)[indices_to_keep]
         self.terms = [list(term) for term in terms]
         self.X_train_cr = self.X_train_cr[:,indices_to_keep]
         max_degree = 0
@@ -437,6 +437,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
                 model_string += term_string
         if model_string == '':
             print('Warning: all coefficients are below the threshold!')
+            
         return model_string
 
     def set_to_default(self):
