@@ -2,7 +2,10 @@ import csv
 import sys
 import numpy as np
 sys.path.append('../')
+
+from DeepInterpretablePolynomialNeuralNetwork.src.generate_synthetic_data import boolean_concept_uniform_distribution
 from DeepInterpretablePolynomialNeuralNetwork.src.deep_interpretable_polynomial_neural_network import DeepInterpretablePolynomialNeuralNetwork, GrowthPolicy
+from DeepInterpretablePolynomialNeuralNetwork.src.evaluation_tools import EvaluationTools
 
 def read_data(path):
     X = []
@@ -60,7 +63,7 @@ def read_data(path):
             X.append(cr_instance_features)
             # set the label
             if '<' in row[-1]:
-                Y.append(-1.0)
+                Y.append(0.0)
             else:
                 Y.append(1.0)   
         '''
@@ -111,20 +114,51 @@ def basic_test_all_terms():
     '''
     print(f'Ro:{sip.ro}')
 
-def basic_test_growth():
+def experiment_no_growth_degree1():
+    # Data
     X, Y, features_names = read_data('./data/adult.data')
+
+    # Model
     d_max = 1
-    balance = 1.0
-    lambda_param = 1.0
+    balance = 2.0
+    lambda_param = 10.0
     ro = 1.0
     fixed_margin = True
-    sip = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.02, coeff_magnitude_th=0.02, 
-                                        max_no_terms_per_iteration=20, max_no_terms=300, growth_policy=GrowthPolicy.SELECT_BY_DERIVATIVE)
+    growth_policy = GrowthPolicy.ALL_TERMS
+    dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
+                                        max_no_terms_per_iteration=20, max_no_terms=200, growth_policy=growth_policy)
+    
+    # Evaluation
     no_runs = 1
-    sip.evaluate_multiple_times(X, Y, no_runs)
-    print(f'Ro:{sip.ro}')
+    test_size = 0.2
+    coefficient_threshold = 0.01
+    precision = 2
+    EvaluationTools.evaluate_multiple_times(dipnn, X, Y, no_runs, test_size, coefficient_threshold, precision)
+    print(f'The margin: {dipnn.ro}')
+
+def experiment_growth_degree2():
+    # Data
+    X, Y, features_names = read_data('./data/adult.data')
+
+    # Model
+    d_max = 2
+    balance = 2.0
+    lambda_param = 1.0
+    ro = 1.0
+    fixed_margin = False
+    growth_policy = GrowthPolicy.GROW
+    dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
+                                        max_no_terms_per_iteration=20, max_no_terms=200, growth_policy=growth_policy)
+    
+    # Evaluation
+    no_runs = 1
+    test_size = 0.2
+    coefficient_threshold = 0.01
+    precision = 2
+    EvaluationTools.evaluate_multiple_times(dipnn, X, Y, no_runs, test_size, coefficient_threshold, precision)
+    print(f'The margin: {dipnn.ro}')
 
 if __name__ == '__main__':
-   basic_test_growth()
+   experiment_growth_degree2()
    
     
