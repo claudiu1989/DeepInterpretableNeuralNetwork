@@ -6,7 +6,7 @@ import numpy as np
 class EvaluationTools:
     
     @staticmethod
-    def test(dipnn, X_test, Y_test):
+    def test(dipnn, X_test, Y_test, new_threshold=-1):
         """ A test method.
             Args:
              X_test:  (2 dimensional np array with float values)- the test data input values; each row corresponds to a data point; 
@@ -17,6 +17,8 @@ class EvaluationTools:
              4 float values-  accuracy, true positive rate (sensitivity), true negative rate (specificity), Area Under the Receiver Operating Characteristic Score 
         """
         Y_predicted_binary,Y_predicted = dipnn.predict(X_test)
+        if new_threshold >= 0.0:
+            Y_predicted_binary = [1.0 if score >= new_threshold else 0.0 for score in Y_predicted]
         no_errors = 0.0 
         N = 0.0 
         P = 0.0 
@@ -44,18 +46,19 @@ class EvaluationTools:
         else:
             TN_rate = TN/N
         roc_auc_score_value = roc_auc_score([1.0 if y >  0.5 else 0.0 for y in Y_test], Y_predicted)
-
-        return 1.0 - no_errors/float(len(Y_predicted_binary)), TP_rate, TN_rate, roc_auc_score_value
+        precision = TP/(TP + N-TN)
+        recall = TP_rate
+        return 1.0 - no_errors/float(len(Y_predicted_binary)), TP_rate, TN_rate, precision, recall, roc_auc_score_value
     
     @staticmethod
-    def evaluate_multiple_times(dipnn, X, Y, no_runs, test_size=0.2, coefficients_threshold=0.0,precision=-1):
+    def evaluate_multiple_times(dipnn, X, Y, no_runs, test_size=0.2, coefficients_threshold=0.0,coeff_precision=-1, new_threshold=-1):
         """ A method for training and testing on a dataset multiple times. The data is split randomly in a training and a test datasets.
             Args:
              X:  (2 dimensional np array with float values)-  the data input values; each row corresponds to a data point; 
                                                               all values must be from the interval [0,1]  
              Y:  (1 dimensional np array with float values)-  the data labels; each entry corresponds to a data point; 
                                                               all values must be from the set {0,1}
-             precision: (int) - if positive, it represents the no. of decimals used for the coefficients representation; if -1, no rounding is performed  
+             coeff_precision: (int) - if positive, it represents the no. of decimals used for the coefficients representation; if -1, no rounding is performed  
             Returns:                                         
              -
         """
@@ -75,7 +78,7 @@ class EvaluationTools:
             end_training = time.time()
             training_time.append(end_training-start_training)
             start_test = time.time()
-            acc, TP_rate, TN_rate, roc_auc = EvaluationTools.test(dipnn, X_test, Y_test)
+            acc, TP_rate, TN_rate, precision, recall, roc_auc = EvaluationTools.test(dipnn, X_test, Y_test,new_threshold)
             end_test = time.time()
             test_time.append(end_test-start_test) # Include some additional processing 
             accuracy_list.append(acc)
@@ -96,11 +99,13 @@ class EvaluationTools:
         avg_test_time = sum(test_time)/float(no_runs)
         var_test_time = (np.sum((np.array(test_time) - avg_test_time)**2))/float(no_runs) 
         print('The model in the last iteration')
-        print(dipnn.get_the_model_representation(coefficients_threshold, precision))
+        print(dipnn.get_the_model_representation(coefficients_threshold, coeff_precision))
         print(f'Average accuracy: {avg_acc}')
         print(f'Variance of accuracy: {var_acc}')
         print(f'Average true positive rate: {sum_TP_rate/float(no_runs)}')
-        print(f'Averagevg true negative rate: {sum_TN_rate/float(no_runs)}')
+        print(f'Average true negative rate: {sum_TN_rate/float(no_runs)}')
+        print(f'Precision: {precision}')
+        print(f'Recall: {recall}')
         print(f'Area Under the Receiver Operating Characteristic Score: {sum_roc_auc/float(no_runs)}')
         print(f'Average training time: {avg_training_time}')
         print(f'Variance of training time: {var_training_time}')
