@@ -14,7 +14,7 @@ class EvaluationTools:
              Y_test:  (1 dimensional np array with float values)- the (true) test data labels; each entry corresponds to a data point; 
                                                                    all values must be from the set {0,1}  
             Returns:                                         
-             4 float values-  accuracy, true positive rate (sensitivity), true negative rate (specificity), Area Under the Receiver Operating Characteristic Score 
+             4 float values-  accuracy, true positive rate (sensitivity), true negative rate (specificity), precision, recall, Area Under the Receiver Operating Characteristic Score 
         """
         Y_predicted_binary,Y_predicted = dipnn.predict(X_test)
         if new_threshold >= 0.0:
