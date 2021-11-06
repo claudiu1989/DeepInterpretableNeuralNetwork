@@ -3,7 +3,10 @@ import csv
 import sys
 import numpy as np
 sys.path.append('../')
+
+from DeepInterpretablePolynomialNeuralNetwork.src.generate_synthetic_data import boolean_concept_uniform_distribution
 from DeepInterpretablePolynomialNeuralNetwork.src.deep_interpretable_polynomial_neural_network import DeepInterpretablePolynomialNeuralNetwork, GrowthPolicy
+from DeepInterpretablePolynomialNeuralNetwork.src.evaluation_tools import EvaluationTools
 
 classes_encoding = {}
 classes_encoding['c-CS-m'] = 0
@@ -54,7 +57,7 @@ def convert_to_logical_values(X):
     return np.array(new_X)
 
 def convert_dataset_for_binary_classification(Y, class_1):
-    return np.array([1.0 if y==class_1 else -1.0 for y in Y])
+    return np.array([1.0 if y==class_1 else 0.0 for y in Y])
 
 def basic_experiment_no_growth(X,Y):
     d_max = 1
@@ -70,8 +73,59 @@ def basic_experiment_no_growth(X,Y):
     print(w_optim_trimed)
     print(f'Ro:{sip.ro}')
 
+def experiment_no_growth_degree1_fixed_margin():
+    # Data
+    X, Y = read_data('./data/MiceProteins/Data_Cortex_Nuclear.csv')
+    X = convert_to_logical_values(X)
+    Y = convert_dataset_for_binary_classification(Y, 0)
+
+    # Model
+    d_max = 1
+    balance = 10.0
+    lambda_param = 10.0
+    ro = 1.0
+    fixed_margin = True
+    growth_policy = GrowthPolicy.ALL_TERMS
+    dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
+                                        max_no_terms_per_iteration=20, max_no_terms=200, growth_policy=growth_policy)
+    
+    # Evaluation
+    no_runs = 1
+    test_size = 0.2
+    coefficient_threshold = 0.01
+    precision = 2
+    EvaluationTools.evaluate_multiple_times(dipnn, X, Y, no_runs, test_size, coefficient_threshold, precision)
+    print(f'The margin: {dipnn.ro}')
+
+def experiment_growth_degree2_no_fixed_margin():
+    # Data
+    X, Y = read_data('./data/MiceProteins/Data_Cortex_Nuclear.csv')
+    X = convert_to_logical_values(X)
+    Y = convert_dataset_for_binary_classification(Y, 0)
+
+    # Model
+    d_max = 2
+    balance = 10.0
+    lambda_param = 0.0
+    ro = 1.0
+    fixed_margin = False
+    growth_policy = GrowthPolicy.GROW
+    dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
+                                        max_no_terms_per_iteration=20, max_no_terms=200, growth_policy=growth_policy)
+    
+    # Evaluation
+    no_runs = 1
+    test_size = 0.2
+    coefficient_threshold = 0.01
+    precision = 2
+    EvaluationTools.evaluate_multiple_times(dipnn, X, Y, no_runs, test_size, coefficient_threshold, precision)
+    print(f'The margin: {dipnn.ro}')
+
 if __name__ == '__main__':
+   '''
    X, Y = read_data('./data/MiceProteins/Data_Cortex_Nuclear.csv')
    X = convert_to_logical_values(X)
    Y = convert_dataset_for_binary_classification(Y, 0.0)
    basic_experiment_no_growth(X,Y)
+   '''
+   experiment_growth_degree2_no_fixed_margin()
