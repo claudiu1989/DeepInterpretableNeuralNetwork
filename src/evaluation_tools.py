@@ -111,3 +111,4 @@ class EvaluationTools:
         print(f'Variance of training time: {var_training_time}')
         print(f'Average test time: {avg_test_time}')
         print(f'Variance of test time: {var_test_time}')
+        return avg_acc, avg_training_time, var_training_time, avg_test_time, var_test_time
