@@ -4,7 +4,6 @@ import sys
 import numpy as np
 sys.path.append('../')
 
-from DeepInterpretablePolynomialNeuralNetwork.src.generate_synthetic_data import boolean_concept_uniform_distribution
 from DeepInterpretablePolynomialNeuralNetwork.src.deep_interpretable_polynomial_neural_network import DeepInterpretablePolynomialNeuralNetwork, GrowthPolicy
 from DeepInterpretablePolynomialNeuralNetwork.src.evaluation_tools import EvaluationTools
 
