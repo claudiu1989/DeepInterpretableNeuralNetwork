@@ -92,29 +92,6 @@ def convert_to_logical_values(X):
         new_X.append(new_row)
     return np.array(new_X)
 
-def basic_test_all_terms():
-    X, Y, features_names = read_data('./Data/adult.data')
-    d_max = 1
-    balance = 1.0
-    lambda_param = 10.0
-    ro = 1.0
-    fixed_margin = True
-    sip = DeepInterpretablePolynomialNeuralNetwork(d_max, lambda_param, balance, fixed_margin, ro, derivative_magnitude_th=0.0, growth_policy=GrowthPolicy.ALL_TERMS)
-    no_runs = 1
-    sip.evaluate_multiple_times(X, Y, no_runs)
-    w_optim_trimed = [w if w>0.01 else 0.0 for w in sip.w_optimal]
-    print('Optimal w:')
-    print(w_optim_trimed)
-    '''
-    indexes_non_zero = [i for i, e in enumerate(w_optim_trimed) if e > 0.0]
-    features_names.extend(['neg_' + feature for feature in features_names])
-    important_features = [(features_names[i],w_optim_trimed[i]) for i in  indexes_non_zero]
-    print(w_optim_trimed)
-    print('Important features:')
-    print(important_features)
-    '''
-    print(f'Ro:{sip.ro}')
-
 def experiment_no_growth_degree1_fixed_margin():
     # Data
     X, Y, features_names = read_data('./data/adult.data')
@@ -161,7 +138,7 @@ def experiment_no_growth_degree1_no_fixed_margin():
     print(f'The margin: {dipnn.ro}')
 
 def experiment_growth_degree2():
-    # Using degree 2 terms do not help
+    # Conclusion- Using degree 2 terms do not help
 
     # Data
     X, Y, features_names = read_data('./data/adult.data')
@@ -187,7 +164,7 @@ def experiment_growth_degree2():
 def experiment_accuracy_interpretability_tradeoff():
     # Before running the experiment please change EvaluationTools.evaluate_multiple_times to return the average accuracy!
     
-    # Analise the trade-off between accuracy and interpretability expresed as the number of terms (all terms have degree 1).
+    # Analysis of the trade-off between accuracy and interpretability expresed as the number of terms (all terms have degree 1).
 
     # Data
     X, Y, features_names = read_data('./data/adult.data')
