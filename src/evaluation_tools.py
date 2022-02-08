@@ -46,7 +46,12 @@ class EvaluationTools:
         else:
             TN_rate = TN/N
         roc_auc_score_value = roc_auc_score([1.0 if y >  0.5 else 0.0 for y in Y_test], Y_predicted)
-        precision = TP/(TP + N-TN)
+        if TP + N-TN != 0.0:
+            precision = TP/(TP + N-TN)
+        else:
+            # TP is 0 in this case
+            print('No true positive examples were found!')
+            precision = 0.0
         recall = TP_rate
         return 1.0 - no_errors/float(len(Y_predicted_binary)), TP_rate, TN_rate, precision, recall, roc_auc_score_value
     
