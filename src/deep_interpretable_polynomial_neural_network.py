@@ -162,6 +162,9 @@ class DeepInterpretablePolynomialNeuralNetwork:
         sum_w = np.sum(w)
         if not fixed_margin and sum_w >= 0.00001:
             cr_ro = 1.0/sum_w
+        if cr_ro == 0.0:
+            print('Warning: The margin is 0! Reseting it to 1.0')
+            cr_ro = 1.0
         exponent = balanced_Y_train * (X_train_cr.dot(w) - 1.0/(2.0*cr_ro))
         exponent = 1 - 2.0 * exponent
         data_terms = np.exp(exponent)
@@ -379,6 +382,9 @@ class DeepInterpretablePolynomialNeuralNetwork:
         sum_w = np.sum(self.beta_optimal)
         if not self.fixed_margin and sum_w >= 0.00001:
             cr_ro = 1.0/sum_w
+        if cr_ro == 0.0:
+            print('Warning: The margin is 0! Reseting it to 1.0')
+            cr_ro = 1.0
         exponent = balanced_Y_train * (self.X_train_cr.dot(self.beta_optimal) - 1.0/(2.0*cr_ro))
         exponent = 1 - 2.0 * exponent
         data_exp_factors = np.exp(exponent)
