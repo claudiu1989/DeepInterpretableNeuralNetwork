@@ -130,16 +130,16 @@ def experiment_running_time_vs_number_of_features():
     fig1, ax1 = plt.subplots()
     ax1.plot(n_features_values,avg_training_time_list)
     ax1.fill_between(n_features_values, (avg_training_time_list-var_training_time_list), (avg_training_time_list+var_training_time_list), color='b', alpha=.1)
-    plt.title('Variation of training time as a function of the number of features')
-    plt.xlabel('Average time(s)')
-    plt.ylabel('No. of features')
+    plt.title('Variation of training time with the number of features')
+    plt.xlabel('Number of features')
+    plt.ylabel('Average time (s)')
 
     fig2, ax2 = plt.subplots()
     ax2.plot(n_features_values,avg_test_time_list)
     ax2.fill_between(n_features_values, (avg_test_time_list-var_test_time_list), (avg_test_time_list+var_test_time_list), color='b', alpha=.1)
-    plt.title('Variation of test time as a function of the number of features')
-    plt.xlabel('Average time(s)')
-    plt.ylabel('No. of features')
+    plt.title('Variation of test time with the number of features')
+    plt.xlabel('Number of features')
+    plt.ylabel('Average time (s)')
     plt.show()
 
 if __name__ == '__main__':
