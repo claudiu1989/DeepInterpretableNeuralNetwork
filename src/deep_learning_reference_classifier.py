@@ -7,32 +7,12 @@ from sklearn.model_selection import train_test_split
 
 
 class DeepLearningReferenceClassifier:
-   
-    def train_network1(self, X_train, Y_train,  X_test, Y_test, epochs, no_classes, no_hidden_layers, size_of_hidden_layers, class_weights=None):
-        no_features = len(X_train[0])
-        layers = [tf.keras.layers.Dense(no_features, activation='relu')]
-        for i in range(no_hidden_layers):
-            layers.append(tf.keras.layers.Dense(size_of_hidden_layers, activation='relu'))
-        layers.append(tf.keras.layers.Dense(no_classes))
-        self.model = tf.keras.Sequential(layers)
-        if no_classes < 2:
-            raise Exception("At least two classes are expected (no_classes>=2)") 
-        elif no_classes == 2:
-            loss = tf.keras.losses.BinaryCrossentropy()
-        else:
-            loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-        self.model.compile(optimizer='adam',
-                    loss=loss,
-                    metrics=['accuracy'])
-        
-        self.model.fit(X_train, Y_train, validation_data=(X_test, Y_test), epochs=epochs, class_weight=class_weights)
     
-    def train_network2(self, X_train, Y_train,  X_test, Y_test, epochs, no_classes, no_hidden_layers, size_of_hidden_layers, class_weights=None):
+    def train_network(self, X_train, Y_train,  X_test, Y_test, epochs, class_weights):
         self.model = tf.keras.Sequential()
         self.model.add(tf.keras.layers.Dense(10, input_dim=len(X_train[0]), activation='relu', kernel_initializer="uniform"))
         self.model.add(tf.keras.layers.Dropout(0.2))
-        self.model.add(tf.keras.layers.Dense(5, activation='relu', kernel_constraint=tf.keras.constraints.MaxNorm(max_value=3)
-, kernel_initializer="uniform"))
+        self.model.add(tf.keras.layers.Dense(5, activation='relu', kernel_initializer="uniform"))
         self.model.add(tf.keras.layers.Dropout(0.2))
         self.model.add(tf.keras.layers.Dense(5, activation='relu', kernel_initializer="uniform"))
         self.model.add(tf.keras.layers.Dense(1, activation='sigmoid', kernel_initializer="uniform"))
@@ -84,7 +64,7 @@ class DeepLearningReferenceClassifier:
 
         return 1.0 - no_errors/float(len(Y_predicted_binary)), TP_rate, TN_rate
 
-    def evaluate_multiple_times(self, X, Y, no_runs, test_size, epochs, no_classes, no_hidden_layers, size_of_hidden_layers, class_weights=None):
+    def evaluate_multiple_times(self, X, Y, no_runs, test_size, epochs,class_weights):
         sum_acc = 0.0
         sum_TP_rate = 0.0
         sum_TN_rate = 0.0
@@ -94,7 +74,7 @@ class DeepLearningReferenceClassifier:
         for k in range(no_runs):
             X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=test_size)
             start_training = time.time()
-            self.train_network2(X_train, Y_train, X_test, Y_test, epochs, no_classes, no_hidden_layers, size_of_hidden_layers, class_weights)
+            self.train_network(X_train, Y_train, X_test, Y_test, epochs, class_weights)
             end_training = time.time()
             training_time.append(end_training-start_training)
             start_test = time.time()
