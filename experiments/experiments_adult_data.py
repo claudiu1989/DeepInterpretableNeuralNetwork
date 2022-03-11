@@ -1,3 +1,10 @@
+'''
+This module contains experiments with the Adult Dataset (https://archive.ics.uci.edu/ml/datasets/adult (Accessed 22.01.2022)). 
+See section 7.3 Experiment 3: the performance with respect to the AUC metric.
+
+Before running the experiments, be sure you download and copy the CSV file in the "data" folder.
+'''
+
 import csv
 import sys
 import numpy as np
@@ -92,27 +99,7 @@ def convert_to_logical_values(X):
         new_X.append(new_row)
     return np.array(new_X)
 
-def experiment_no_growth_degree1_fixed_margin():
-    # Data
-    X, Y, features_names = read_data('./data/adult.data')
-
-    # Model
-    d_max = 1
-    balance = 2.0
-    lambda_param = 10.0
-    ro = 1.0
-    fixed_margin = True
-    growth_policy = GrowthPolicy.ALL_TERMS
-    dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
-                                        max_no_terms_per_iteration=20, max_no_terms=200, growth_policy=growth_policy)
-    
-    # Evaluation
-    no_runs = 1
-    test_size = 0.2
-    coefficient_threshold = 0.01
-    precision = 2
-    EvaluationTools.evaluate_multiple_times(dipnn, X, Y, no_runs, test_size, coefficient_threshold, precision)
-    print(f'The margin: {dipnn.ro}')
+ # EXPERIMENTS REPORTED IN THE PAPER
 
 def experiment_no_growth_degree1_no_fixed_margin():
     # AUC experiments
@@ -131,6 +118,77 @@ def experiment_no_growth_degree1_no_fixed_margin():
     
     # Evaluation
     no_runs = 100
+    test_size = 0.2
+    coefficient_threshold = 0.01
+    precision = 2
+    EvaluationTools.evaluate_multiple_times(dipnn, X, Y, no_runs, test_size, coefficient_threshold, precision)
+    print(f'The margin: {dipnn.ro}')
+    
+def experiment_accuracy_interpretability_tradeoff():
+    # Analysis of the trade-off between accuracy and interpretability expresed as the number of terms (all terms have degree 1).
+
+    # Data
+    X, Y, features_names = read_data('./data/adult.data')
+    #print(features_names)
+    # Model
+    d_max = 1
+    balance = 2.0
+    lambda_param_values = list(range(0,41,2))
+    terms_count_list = []
+    accuracy_list = []
+    for lambda_param in lambda_param_values:
+        ro = 1.0
+        fixed_margin = False
+        growth_policy = GrowthPolicy.GROW
+        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
+                                            max_no_terms_per_iteration=20, max_no_terms=200, growth_policy=growth_policy)
+        
+        # Evaluation
+        no_runs = 1
+        test_size = 0.2
+        coefficient_threshold = 0.01
+        precision = 2
+        
+        avg_acc, avg_training_time, var_training_time, avg_test_time, var_test_time, avg_tp_rate, avg_tn_rate  = EvaluationTools.evaluate_multiple_times(dipnn, X, Y, no_runs, test_size, coefficient_threshold, precision)
+        model_representation = dipnn.get_the_model_representation(coefficient_threshold, precision)
+        terms_count = len(model_representation.split('+'))
+        terms_count_list.append(terms_count)
+        accuracy_list.append(avg_acc)
+        print(f'The margin: {dipnn.ro}')
+
+    # Plot
+    fig, ax1 = plt.subplots()
+    color = 'tab:green'
+    ax1.set_xlabel('Lambda')
+    ax1.set_ylabel('Accuracy', color=color)
+    ax1.plot(lambda_param_values, accuracy_list, color=color)
+    ax1.tick_params(axis='y', labelcolor=color)
+    ax2 = ax1.twinx() 
+    color = 'tab:red'
+    ax2.set_ylabel('No. of terms', color=color) 
+    ax2.plot(lambda_param_values, terms_count_list, color=color)
+    ax2.tick_params(axis='y', labelcolor=color)
+    fig.tight_layout()
+    plt.show()
+
+# OTHER EXPERIMENTS
+
+def experiment_no_growth_degree1_fixed_margin():
+    # Data
+    X, Y, features_names = read_data('./data/adult.data')
+    print(features_names)
+    # Model
+    d_max = 1
+    balance = 2.0
+    lambda_param = 10.0
+    ro = 1.0
+    fixed_margin = True
+    growth_policy = GrowthPolicy.ALL_TERMS
+    dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
+                                        max_no_terms_per_iteration=20, max_no_terms=200, growth_policy=growth_policy)
+    
+    # Evaluation
+    no_runs = 1
     test_size = 0.2
     coefficient_threshold = 0.01
     precision = 2
@@ -161,56 +219,9 @@ def experiment_growth_degree2():
     EvaluationTools.evaluate_multiple_times(dipnn, X, Y, no_runs, test_size, coefficient_threshold, precision)
     print(f'The margin: {dipnn.ro}')
 
-def experiment_accuracy_interpretability_tradeoff():
-    # Before running the experiment please change EvaluationTools.evaluate_multiple_times to return the average accuracy!
-    
-    # Analysis of the trade-off between accuracy and interpretability expresed as the number of terms (all terms have degree 1).
 
-    # Data
-    X, Y, features_names = read_data('./data/adult.data')
-    #print(features_names)
-    # Model
-    d_max = 1
-    balance = 2.0
-    lambda_param_values = list(range(0,41,2))
-    terms_count_list = []
-    accuracy_list = []
-    for lambda_param in lambda_param_values:
-        ro = 1.0
-        fixed_margin = False
-        growth_policy = GrowthPolicy.GROW
-        dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
-                                            max_no_terms_per_iteration=20, max_no_terms=200, growth_policy=growth_policy)
-        
-        # Evaluation
-        no_runs = 1
-        test_size = 0.2
-        coefficient_threshold = 0.01
-        precision = 2
-        
-        accuracy = EvaluationTools.evaluate_multiple_times(dipnn, X, Y, no_runs, test_size, coefficient_threshold, precision)
-        model_representation = dipnn.get_the_model_representation(coefficient_threshold, precision)
-        terms_count = len(model_representation.split('+'))
-        terms_count_list.append(terms_count)
-        accuracy_list.append(accuracy)
-        print(f'The margin: {dipnn.ro}')
-
-    # Plot
-    fig, ax1 = plt.subplots()
-    color = 'tab:green'
-    ax1.set_xlabel('Lambda')
-    ax1.set_ylabel('Accuracy', color=color)
-    ax1.plot(lambda_param_values, accuracy_list, color=color)
-    ax1.tick_params(axis='y', labelcolor=color)
-    ax2 = ax1.twinx() 
-    color = 'tab:red'
-    ax2.set_ylabel('No. of terms', color=color) 
-    ax2.plot(lambda_param_values, terms_count_list, color=color)
-    ax2.tick_params(axis='y', labelcolor=color)
-    fig.tight_layout()
-    plt.show()
 
 if __name__ == '__main__':
    experiment_no_growth_degree1_no_fixed_margin()
-   
+   experiment_accuracy_interpretability_tradeoff()
     
