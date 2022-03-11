@@ -87,18 +87,13 @@ def read_data_heart_failure(path):
 
 def experiment_on_heart_attack_dataset_reference_classifier():
     X, Y = read_data_heart_failure('.\Data\heart_failure_clinical_records_dataset.csv')
-    #X, Y, _ = read_data_adult('.\Data\\adult.csv')
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.20)
-    epochs = 1
-    no_classes = 2
-    no_hidden_layers = 10
-    size_of_hidden_layers = 5 #len(X_train[0])/2
+    epochs = 50
     dlc = DeepLearningReferenceClassifier()
     no_runs = 100
     test_size = 0.2
     class_weights = {0: 1.0,
-                1: 1.1}
-    dlc.evaluate_multiple_times(X, Y, no_runs, test_size, epochs, no_classes, no_hidden_layers, size_of_hidden_layers, class_weights)
+                1: 2.0}
+    dlc.evaluate_multiple_times(X, Y, no_runs, test_size, epochs, class_weights)
 
 if __name__ == '__main__': 
     experiment_on_heart_attack_dataset_reference_classifier()
