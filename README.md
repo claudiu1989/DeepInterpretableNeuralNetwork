@@ -9,7 +9,7 @@ The repository contains an implementation of DIPNN (Deep Interpretable Neural Ne
 
 The algorithm is derived using a learning bound for predictors that are convex combinations of functions from simpler classes. More explicitly, the hypothesis are polynomials over the input features, and are interpreted as convex combinations of (simpler) homogeneous polynomials. Training is done by minimizing a surrogate of the learning bound, using an iterative two-phases algorithm. Basically, in the first phase the algorithm decide which new monomials of higher degree should be added, and in the second phase the coefficients are recomputed by solving a convex program. The interpretability is achieved by transforming the input features such that they can be viewed as reflecting the degree of truth of some proposition about the instance that is being classified. In this paradigm, the trained neural network will be a compound proposition and it can be understood by humans.
 
-![Vis](old/gallup.png)
+![Vis](images/network_diagram.png)
 
 ## Usage
 
