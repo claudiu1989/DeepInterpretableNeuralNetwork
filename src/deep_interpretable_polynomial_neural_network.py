@@ -15,19 +15,18 @@ class DeepInterpretablePolynomialNeuralNetwork:
         self.ro = ro
         # Indicator of the type of margin used
         self.fixed_margin = fixed_margin
-        # Positive labels (1) weight
+        # The weight of the positive labels (1) 
         self.balance = balance
         # Regularisation parameter 
         self.lambda_param = lambda_param
         # Maximum degree
         self.d_max = d_max
-        # Maximum degree
+        # The type of growth policy
         self.growth_policy = growth_policy
         # The minimum magnitude of the derivative required to add the new term
         self.derivative_magnitude_th = derivative_magnitude_th
-        # The minimum magnitude of a parameter (beta_i) required to keep it's assocaited term
+        # The minimum magnitude of a parameter (beta is) required to keep its associated term
         self.coeff_magnitude_th = coeff_magnitude_th
-        
         # Maximum number of terms that can be added in an iteration
         self.max_no_terms_per_iteration = max_no_terms_per_iteration
         # Maximum number of terms
