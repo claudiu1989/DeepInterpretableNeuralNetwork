@@ -2,9 +2,8 @@
 
   **[Overview](#overview)**
 | **[Usage](#usage)**
-| **[Paper](tbd)**
 
-
+## Overview
 
 The repository contains an implementation of DIPNN (Deep Interpretable Neural Network), a new neural network architecture and training algorithm for generating interpretable models. 
 
