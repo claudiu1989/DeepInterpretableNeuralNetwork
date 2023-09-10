@@ -1,11 +1,12 @@
 import time
+import numpy as np
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
-import numpy as np
+
 
 class EvaluationTools:
-    
+
     @staticmethod
     def test(dipnn, X_test, Y_test, new_threshold=-1):
         """ A test method.
@@ -17,17 +18,17 @@ class EvaluationTools:
             Returns:                                         
              4 float values-  accuracy, true positive rate (sensitivity), true negative rate (specificity), precision, recall, Area Under the Receiver Operating Characteristic Score 
         """
-        Y_predicted_binary,Y_predicted = dipnn.predict(X_test)
+        Y_predicted_binary, Y_predicted = dipnn.predict(X_test)
         if new_threshold >= 0.0:
             Y_predicted_binary = [1.0 if score >= new_threshold else 0.0 for score in Y_predicted]
-        no_errors = 0.0 
+        n_errors = 0.0 
         N = 0.0 
         P = 0.0 
         TN = 0.0
         TP = 0.0
-        for y_p,y in zip(Y_predicted_binary,Y_test):
+        for y_p, y in zip(Y_predicted_binary, Y_test):
             if y_p != y:
-                no_errors += 1.0
+                n_errors += 1.0
             if y == 1.0:
                 P += 1.0
                 if y_p == 1.0:
@@ -54,10 +55,10 @@ class EvaluationTools:
             print('No true positive examples were found!')
             precision = 0.0
         recall = TP_rate
-        return 1.0 - no_errors/float(len(Y_predicted_binary)), TP_rate, TN_rate, precision, recall, roc_auc_score_value
-    
+        return 1.0 - n_errors/float(len(Y_predicted_binary)), TP_rate, TN_rate, precision, recall, roc_auc_score_value
+
     @staticmethod
-    def evaluate_multiple_times(dipnn, X, Y, no_runs, test_size=0.2, coefficients_threshold=0.0,coeff_precision=-1, new_threshold=-1):
+    def evaluate_multiple_times(dipnn, X, Y, no_runs, test_size=0.2, coefficients_threshold=0.0, coeff_precision=-1, new_threshold=-1):
         """ A method for training and testing on a dataset multiple times. The data is split randomly in a training and a test datasets.
             Args:
              X:  (2 dimensional np array with float values)-  the data input values; each row corresponds to a data point; 
@@ -83,11 +84,11 @@ class EvaluationTools:
             dipnn.set_to_default()
             X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=test_size)
             start_training = time.time()
-            dipnn.train(X_train,Y_train)
+            dipnn.train(X_train, Y_train)
             end_training = time.time()
             training_time.append(end_training-start_training)
             start_test = time.time()
-            acc, TP_rate, TN_rate, precision, recall, roc_auc = EvaluationTools.test(dipnn, X_test, Y_test,new_threshold)
+            acc, TP_rate, TN_rate, precision, recall, roc_auc = EvaluationTools.test(dipnn, X_test, Y_test, new_threshold)
             end_test = time.time()
             test_time.append(end_test-start_test) # Include some additional processing 
             accuracy_list.append(acc)
@@ -118,9 +119,8 @@ class EvaluationTools:
         print(f'Variance of test time: {var_test_time}')
         return avg_acc, avg_training_time, var_training_time, avg_test_time, var_test_time, avg_tp_rate, avg_tn_rate, sum_roc_auc/float(no_runs)
 
-
     @staticmethod
-    def evaluate_k_fold(dipnn, X, Y, n_folds, coefficients_threshold=0.0,coeff_precision=-1, new_threshold=-1, seed=30):
+    def evaluate_k_fold(dipnn, X, Y, n_folds, coefficients_threshold=0.0, coeff_precision=-1, new_threshold=-1, seed=30):
         """ A method for training and testing using the k-fold procedure.
             Args:
              X:  (2 dimensional np array with float values)-  the data input values; each row corresponds to a data point; 
@@ -151,11 +151,11 @@ class EvaluationTools:
             X_train, X_test = X[train_index], X[test_index]
             Y_train, Y_test = Y[train_index], Y[test_index]
             start_training = time.time()
-            dipnn.train(X_train,Y_train)
+            dipnn.train(X_train, Y_train)
             end_training = time.time()
             training_time.append(end_training-start_training)
             start_test = time.time()
-            acc, TP_rate, TN_rate, precision, recall, roc_auc = EvaluationTools.test(dipnn, X_test, Y_test,new_threshold)
+            acc, TP_rate, TN_rate, precision, recall, roc_auc = EvaluationTools.test(dipnn, X_test, Y_test, new_threshold)
             end_test = time.time()
             test_time.append(end_test-start_test) # Include some additional processing 
             accuracy_list.append(acc)

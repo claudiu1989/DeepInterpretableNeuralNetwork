@@ -1,13 +1,11 @@
-
 import time
 import numpy as np
 import tensorflow as tf
-from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
 
 class DeepLearningReferenceClassifier:
-    
+
     def train_network(self, X_train, Y_train,  X_test, Y_test, epochs, class_weights):
         self.model = tf.keras.Sequential()
         self.model.add(tf.keras.layers.Dense(10, input_dim=len(X_train[0]), activation='relu', kernel_initializer="uniform"))
@@ -26,22 +24,21 @@ class DeepLearningReferenceClassifier:
         # Evaluate the model
         scores = self.model.evaluate(X_test, Y_test)
         print("%s: %.2f%%" % (self.model.metrics_names[1], scores[1]*100))
-    
+
     def predict(self, X_test):
         predictions = self.model.predict_classes(X_test)
         return predictions
 
-
     def test(self, X_test, Y_test):
         Y_predicted_binary = self.predict(X_test)
-        no_errors = 0.0 
+        n_errors = 0.0 
         N = 0.0 
         P = 0.0 
         TN = 0.0
         TP = 0.0
-        for y_p,y in zip(Y_predicted_binary,Y_test):
+        for y_p, y in zip(Y_predicted_binary, Y_test):
             if y_p != y:
-                no_errors += 1.0
+                n_errors += 1.0
             if y == 1.0:
                 P += 1.0
                 if y_p == 1.0:
@@ -60,11 +57,10 @@ class DeepLearningReferenceClassifier:
             TN_rate = 1.0
         else:
             TN_rate = TN/N
-        #roc_auc_score_value = roc_auc_score([1.0 if y >  0.5 else 0.0 for y in Y_test], Y_predicted[:,0])
 
-        return 1.0 - no_errors/float(len(Y_predicted_binary)), TP_rate, TN_rate
+        return 1.0 - n_errors/float(len(Y_predicted_binary)), TP_rate, TN_rate
 
-    def evaluate_multiple_times(self, X, Y, no_runs, test_size, epochs,class_weights):
+    def evaluate_multiple_times(self, X, Y, no_runs, test_size, epochs, class_weights):
         sum_acc = 0.0
         sum_TP_rate = 0.0
         sum_TN_rate = 0.0

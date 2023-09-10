@@ -3,14 +3,26 @@ from scipy.optimize import minimize
 from enum import Enum
 from itertools import combinations_with_replacement
 
+
 class GrowthPolicy(Enum):
     ALL_TERMS = 1
     GROW = 2
     PRUNE_AND_GROW = 3
 
+
 class DeepInterpretablePolynomialNeuralNetwork:
-    def __init__(self, d_max, lambda_param, balance, fixed_margin=True, ro=1.0, derivative_magnitude_th=0.0, coeff_magnitude_th=0.0, 
-                 max_no_terms_per_iteration=-1, max_no_terms=-1, growth_policy=GrowthPolicy.ALL_TERMS):
+    def __init__(
+                self,
+                d_max,
+                lambda_param,
+                balance,
+                fixed_margin=True,
+                ro=1.0,
+                derivative_magnitude_th=0.0,
+                coeff_magnitude_th=0.0,
+                max_no_terms_per_iteration=-1,
+                max_no_terms=-1,
+                growth_policy=GrowthPolicy.ALL_TERMS):
         # The margin
         self.ro = ro
         # Indicator of the type of margin used
@@ -240,7 +252,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
                 cr_degree = len(term)
         self.cr_degrees_limits.append(len(all_terms))
         return all_terms
-    
+
     def add_terms_and_features_of_next_degree(self, next_degree):
         """ Add the terms of next degree, and the corresponding features.
             Args:
@@ -417,7 +429,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
              string- a representation of the model
         """
         rounded_w_optimal = self.w_optimal
-        if precision>0:
+        if precision > 0:
             rounded_w_optimal = np.around(self.w_optimal, decimals=precision)
         terms_coeffs = zip(self.terms, rounded_w_optimal)
         model_string = ''
@@ -442,7 +454,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
                 model_string += term_string
         if model_string == '':
             print('Warning: all coefficients are below the threshold!')
-            
+
         return model_string
 
     def set_to_default(self):
@@ -452,7 +464,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
             Returns:
             -
         """
-         # Training data- these will remain fixed during training
+        # Training data- these will remain fixed during training
         self.X_train = np.array([])
         self.Y_train = np.array([])
         # Test data - these will remain fixed during testing
