@@ -1,13 +1,18 @@
 # DIPNN: Deep Interpretable Polynomial Neural Network
 
+  **[Intro](#intro)**
   **[Overview](#overview)**
 | **[Usage](#usage)**
+
+## Intro
+
+The code for my paper "An algorithm for training a class of polynomial models.", Marius-Claudiu Popescu, Lacrimioara Grama, and Corneliu Rusu, Digital Signal Processing 141 (2023): 104168. -https://www.sciencedirect.com/science/article/abs/pii/S1051200423002634
 
 ## Overview
 
 The repository contains an implementation of DIPNN (Deep Interpretable Neural Network), a new neural network architecture and training algorithm for generating interpretable models. 
 
-The algorithm is derived using a learning bound for predictors that are convex combinations of functions from simpler classes. More explicitly, the hypothesis are polynomials over the input features, and are interpreted as convex combinations of (simpler) homogeneous polynomials. Training is done by minimizing a surrogate of the learning bound, using an iterative two-phases algorithm. Basically, in the first phase the algorithm decide which new monomials of higher degree should be added, and in the second phase the coefficients are recomputed by solving a convex program. The interpretability is achieved by transforming the input features such that they can be viewed as reflecting the degree of truth of some proposition about the instance that is being classified. In this paradigm, the trained neural network will be a compound proposition and it can be understood by humans.
+The training algorithm is derived using a learning bound for predictors that are convex combinations of functions from simpler classes. More explicitly, the hypothesis are polynomials over the input features, and are interpreted as convex combinations of (simpler) homogeneous polynomials. Training is done by minimizing a surrogate of the learning bound, using an iterative two-phases algorithm. Basically, in the first phase the algorithm decide which new monomials of higher degree should be added, and in the second phase the coefficients are recomputed by solving a convex program. The interpretability is achieved by transforming the input features such that they can be viewed as reflecting the degree of truth of some proposition about the instance that is being classified. In this paradigm, the trained neural network will be a compound proposition and it can be understood by humans.
 
 ![Vis](images/network_diagram.png)
 
