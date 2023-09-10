@@ -1,42 +1,41 @@
 '''
    Unit and integration tests
 '''
-
 import sys
+import unittest
 import numpy as np
 from numpy.testing import assert_almost_equal
 sys.path.append('../')
-from  DeepInterpretablePolynomialNeuralNetwork.src.deep_interpretable_polynomial_neural_network import DeepInterpretablePolynomialNeuralNetwork, GrowthPolicy
-
-import unittest
+from DeepInterpretablePolynomialNeuralNetwork.src.deep_interpretable_polynomial_neural_network import DeepInterpretablePolynomialNeuralNetwork, GrowthPolicy
 from parameterized import parameterized
 
+
 def mock_compute_exp_factors_derivative():
-        return np.array([-1.0,1.0])
+    return np.array([-1.0, 1.0])
+
 
 def mock_compute_derivative(new_term, next_degree, data_exp_factors):
     return -1
-class TestDipnn(unittest.TestCase):
-    
 
+
+class TestDipnn(unittest.TestCase):
     @parameterized.expand([
-        [2, 5.0, 4.0,True,3.0,0.5,0.4,100,1000,GrowthPolicy.GROW
-    ]])
-    def test_init(self,d_max, lambda_param, balance, fixed_margin, ro, derivative_magnitude_th, coeff_magnitude_th, 
+        [2, 5.0, 4.0, True, 3.0, 0.5, 0.4, 100, 1000, GrowthPolicy.GROW]])
+    def test_init(self, d_max, lambda_param, balance, fixed_margin, ro, derivative_magnitude_th, coeff_magnitude_th, 
                  max_no_terms_per_iteration, max_no_terms, growth_policy):
         dipnn = DeepInterpretablePolynomialNeuralNetwork(d_max=d_max, lambda_param=lambda_param, balance=balance, fixed_margin=fixed_margin, ro=ro, 
                                                        derivative_magnitude_th=derivative_magnitude_th, coeff_magnitude_th=coeff_magnitude_th, 
                                                        max_no_terms_per_iteration=max_no_terms_per_iteration, max_no_terms=max_no_terms, growth_policy=growth_policy)
-        self.assertEqual(dipnn.d_max,d_max)
-        self.assertEqual(dipnn.lambda_param,lambda_param)
-        self.assertEqual(dipnn.balance,balance)
-        self.assertEqual(dipnn.fixed_margin,fixed_margin)
-        self.assertEqual(dipnn.ro,ro)
-        self.assertEqual(dipnn.derivative_magnitude_th,derivative_magnitude_th)
-        self.assertEqual(dipnn.coeff_magnitude_th,coeff_magnitude_th)
-        self.assertEqual(dipnn.max_no_terms_per_iteration,max_no_terms_per_iteration)
-        self.assertEqual(dipnn.max_no_terms,max_no_terms)
-        self.assertEqual(dipnn.growth_policy,growth_policy)
+        self.assertEqual(dipnn.d_max, d_max)
+        self.assertEqual(dipnn.lambda_param, lambda_param)
+        self.assertEqual(dipnn.balance, balance)
+        self.assertEqual(dipnn.fixed_margin, fixed_margin)
+        self.assertEqual(dipnn.ro, ro)
+        self.assertEqual(dipnn.derivative_magnitude_th, derivative_magnitude_th)
+        self.assertEqual(dipnn.coeff_magnitude_th, coeff_magnitude_th)
+        self.assertEqual(dipnn.max_no_terms_per_iteration, max_no_terms_per_iteration)
+        self.assertEqual(dipnn.max_no_terms, smax_no_terms)
+        self.assertEqual(dipnn.growth_policy, growth_policy)
 
     @parameterized.expand([
         [np.array([1.0,1.0,1.0,1.0]), np.array([[1.0,0.0,1.0,0.0],[0.0,1.0,1.0,1.0]]), np.array([1.0,-1.0]), 2, 4, [4], 1, 1.0,  True, 0.25, 1.0, 16.365],
@@ -74,7 +73,7 @@ class TestDipnn(unittest.TestCase):
         dipnn.Y_train = Y_train
         exp_factors = dipnn.compute_exp_factors_derivative()
         for expected, computed in zip(exp_factors, expected_result):
-           assert_almost_equal(expected, computed,decimal=3)
+            assert_almost_equal(expected, computed, decimal=3)
 
     @parameterized.expand([
     [np.array([[1.0,1.0,1.0,1.0],[1.0,0.0,0.0,0.0]]), np.array([1.0,-1.0]), np.array([1.0,0.0]),[1,0], 2, 0.384],
@@ -149,7 +148,7 @@ class TestDipnn(unittest.TestCase):
         dipnn.beta_optimal = np.array([1.0,0.1,2.0,0.2])
         dipnn.w_optimal = np.array([1.0,0.1,2.0,0.2])
         dipnn.compute_exp_factors_derivative = mock_compute_exp_factors_derivative
-        dipnn.compute_derivative= mock_compute_derivative
+        dipnn.compute_derivative = mock_compute_derivative
         dipnn.max_no_terms_per_iteration = 100
         dipnn.max_no_terms = 100
         dipnn.add_terms_and_features_of_next_degree(2)
@@ -170,10 +169,10 @@ class TestDipnn(unittest.TestCase):
         dipnn.beta_optimal = np.array([1.0,0.1,2.0,0.2])
         dipnn.w_optimal = np.array([1.0,0.1,2.0,0.2])
         dipnn.compute_exp_factors_derivative = mock_compute_exp_factors_derivative
-        dipnn.compute_derivative= mock_compute_derivative
+        dipnn.compute_derivative = mock_compute_derivative
         dipnn.max_no_terms_per_iteration = 100
         dipnn.max_no_terms = 100
-        dipnn.cr_degrees_limits = [2,4]
+        dipnn.cr_degrees_limits = [2, 4]
         dipnn.add_terms_and_features_of_next_degree(2)
         are_identical = np.array_equal(np.array(dipnn.terms), np.array(expected_result))
         self.assertTrue(are_identical)
@@ -194,14 +193,14 @@ class TestDipnn(unittest.TestCase):
         dipnn.X_train = np.array([[1.0,1.0,1.0,1.0],[1.0,0.0,0.0,0.0]])
         dipnn.X_train_cr = np.array([[1.0,1.0,1.0,1.0],[1.0,0.0,0.0,0.0]])
         dipnn.compute_exp_factors_derivative = mock_compute_exp_factors_derivative
-        dipnn.compute_derivative= mock_compute_derivative
+        dipnn.compute_derivative = mock_compute_derivative
         dipnn.max_no_terms_per_iteration = 4
         dipnn.max_no_terms = 100
         dipnn.cr_degrees_limits = [4]
         dipnn.add_terms_and_features_of_next_degree(2)
         are_identical = np.array_equal(np.array(dipnn.beta_optimal), np.array(expected_result))
         self.assertTrue(are_identical)
-        self.assertEqual(dipnn.no_features,8)
+        self.assertEqual(dipnn.no_features, 8)
 
     @parameterized.expand([
     [2,  [[0],[1],[2],[3],[0,0],[0,1],[0,2],[0,3],[1,1],[1,2],[1,3],[2,2],[2,3],[3,3]]]])   
