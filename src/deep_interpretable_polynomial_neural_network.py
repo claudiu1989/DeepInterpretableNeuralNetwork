@@ -11,6 +11,7 @@ class GrowthPolicy(Enum):
 
 
 class DeepInterpretablePolynomialNeuralNetwork:
+    # TODO: add type hints
     def __init__(
                 self,
                 d_max,

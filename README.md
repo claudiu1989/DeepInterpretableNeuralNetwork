@@ -16,6 +16,11 @@ The training algorithm is derived using a learning bound for predictors that are
 
 ![Vis](images/network_diagram.png)
 
+TODO: 
+  1. Add type hints
+  2. Make some methods private
+  3. Split large classes
+  
 ## Usage
 
 -Clone the repository
