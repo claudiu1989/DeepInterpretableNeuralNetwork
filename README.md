@@ -1,12 +1,12 @@
 # DIPNN: Deep Interpretable Polynomial Neural Network
 
   **[Intro](#intro)**
-  **[Overview](#overview)**
+| **[Overview](#overview)**
 | **[Usage](#usage)**
 
 ## Intro
 
-The code for my paper "An algorithm for training a class of polynomial models.", Marius-Claudiu Popescu, Lacrimioara Grama, and Corneliu Rusu, Digital Signal Processing 141 (2023): 104168. -https://www.sciencedirect.com/science/article/abs/pii/S1051200423002634
+The code for my paper "An algorithm for training a class of polynomial models", Marius-Claudiu Popescu, Lacrimioara Grama, and Corneliu Rusu, Digital Signal Processing 141 (2023): 104168. -https://www.sciencedirect.com/science/article/abs/pii/S1051200423002634
 
 ## Overview
 
