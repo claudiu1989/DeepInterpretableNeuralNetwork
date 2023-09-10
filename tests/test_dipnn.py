@@ -19,6 +19,7 @@ def mock_compute_derivative(new_term, next_degree, data_exp_factors):
 
 
 class TestDipnn(unittest.TestCase):
+    # TODO: fix style issues
     @parameterized.expand([
         [2, 5.0, 4.0, True, 3.0, 0.5, 0.4, 100, 1000, GrowthPolicy.GROW]])
     def test_init(self, d_max, lambda_param, balance, fixed_margin, ro, derivative_magnitude_th, coeff_magnitude_th, 

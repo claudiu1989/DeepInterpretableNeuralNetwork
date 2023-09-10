@@ -108,6 +108,7 @@ class DeepInterpretablePolynomialNeuralNetwork:
             i = i + 1
         print('\nThe training process finished with success!\n')
 
+    # TODO: the next method (and others from this class) should be private
     def train_phase1(self):
         """ The first phase of the training iteration.
             Args:
